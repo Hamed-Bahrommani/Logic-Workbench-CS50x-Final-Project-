@@ -28,13 +28,14 @@ def _run(operation: Callable[[], dict]) -> dict:
 
 
 def parse_formula(text: str) -> dict:
-    """Parse `text`. Payload: ast, canonical, variables."""
+    """Parse `text`. Payload: ast, canonical, display, variables."""
 
     def operation() -> dict:
         formula = parse(text)
         return {
             "ast": _ast_to_dict(formula),
             "canonical": to_string(formula),
+            "display": to_string(formula, explicit=True),
             "variables": variables(formula),
         }
 
@@ -46,7 +47,11 @@ def truth_table(text: str) -> dict:
 
     def operation() -> dict:
         formula = parse(text)
-        return {"canonical": to_string(formula), **build_truth_table(formula)}
+        return {
+            "canonical": to_string(formula),
+            "display": to_string(formula, explicit=True),
+            **build_truth_table(formula),
+        }
 
     return _run(operation)
 

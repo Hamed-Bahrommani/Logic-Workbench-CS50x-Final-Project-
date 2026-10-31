@@ -119,3 +119,12 @@ def test_truth_table_never_raises_on_hostile_input():
 def test_results_are_json_serialisable(call):
     result = call()
     assert json.loads(json.dumps(result)) == result
+
+def test_display_uses_explicit_grouping_and_canonical_stays_minimal():
+    parsed = api.parse_formula("P -> (Q & ~R)")
+    assert parsed["canonical"] == "P → Q ∧ ¬R"
+    assert parsed["display"] == "P → (Q ∧ ¬R)"
+
+    table = api.truth_table("P ∨ Q ∧ R")
+    assert table["canonical"] == "P ∨ Q ∧ R"
+    assert table["display"] == "P ∨ (Q ∧ R)"

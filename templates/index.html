@@ -57,7 +57,7 @@
 {% else %}
 <section aria-labelledby="result-heading">
     <h2 id="result-heading">Result</h2>
-    <p class="canonical">Read as: <code>{{ result.canonical }}</code></p>
+    <p class="canonical">Read as: <code>{{ result.display }}</code></p>
     <p class="verdict">
         <span class="badge {{ result.classification }}">{{ result.classification }}</span>
         {{ classification_help[result.classification] }}.
@@ -78,13 +78,13 @@
     {% else %}
     <div class="table-wrap">
         <table class="truth-table">
-            <caption class="visually-hidden">Truth table for {{ result.canonical }}</caption>
+            <caption class="visually-hidden">Truth table for {{ result.display }}</caption>
             <thead>
                 <tr>
                     {% for name in result.variables %}
                     <th scope="col">{{ name }}</th>
                     {% endfor %}
-                    <th scope="col" class="formula-col">{{ result.canonical }}</th>
+                    <th scope="col" class="formula-col">{{ result.display }}</th>
                 </tr>
             </thead>
             <tbody>

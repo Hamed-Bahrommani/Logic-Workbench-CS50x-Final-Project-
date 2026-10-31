@@ -100,3 +100,53 @@ def test_round_trip_on_random_trees():
     for _ in range(3000):
         formula = random_formula(rng, 6)
         assert parse(to_string(formula)) == formula, to_string(formula)
+
+# --- explicit-grouping mode (the web page uses this) ---
+
+EXPLICIT_CASES = [
+    ("P", "P"),
+    ("⊥", "⊥"),
+    ("¬⊥", "¬⊥"),
+    ("¬¬P", "¬¬P"),
+    ("¬P ∧ Q", "¬P ∧ Q"),
+    ("¬(P ∧ Q)", "¬(P ∧ Q)"),
+    ("P → (Q ∧ ¬R)", "P → (Q ∧ ¬R)"),
+    ("P ∨ Q ∧ R", "P ∨ (Q ∧ R)"),
+    ("P ∧ Q → R ∨ S", "(P ∧ Q) → (R ∨ S)"),
+    ("P ↔ Q → R", "P ↔ (Q → R)"),
+    ("P → Q ↔ R", "(P → Q) ↔ R"),
+    ("(P ∨ Q) ∧ R", "(P ∨ Q) ∧ R"),
+    ("P ∧ Q ∨ R ∧ S ∨ U", "(P ∧ Q) ∨ (R ∧ S) ∨ U"),
+    ("P ∧ Q ∧ R", "P ∧ Q ∧ R"),              # same-operator chains keep their associativity
+    ("P ∧ (Q ∧ R)", "P ∧ (Q ∧ R)"),
+    ("P → Q → R", "P → Q → R"),
+    ("(P → Q) → R", "(P → Q) → R"),
+    ("(P ↔ Q) ↔ R", "(P ↔ Q) ↔ R"),
+    ("¬(P ∨ Q) ↔ ¬P ∧ ¬Q", "¬(P ∨ Q) ↔ (¬P ∧ ¬Q)"),
+    ("(P ∧ Q) ∨ R ↔ (P ∨ R) ∧ (Q ∨ R)", "((P ∧ Q) ∨ R) ↔ ((P ∨ R) ∧ (Q ∨ R))"),
+]
+
+
+@pytest.mark.parametrize("text, expected", EXPLICIT_CASES)
+def test_explicit_output_and_round_trip(text, expected):
+    ast = parse(text)
+    printed = to_string(ast, explicit=True)
+    assert printed == expected
+    assert parse(printed) == ast          # the extra parentheses never change the tree
+
+
+def test_explicit_round_trip_on_random_trees():
+    rng = random.Random(2027)
+    for _ in range(3000):
+        formula = random_formula(rng, 6)
+        assert parse(to_string(formula, explicit=True)) == formula, to_string(formula)
+
+
+def test_explicit_mode_only_ever_adds_parentheses():
+    rng = random.Random(11)
+    for _ in range(1000):
+        formula = random_formula(rng, 6)
+        minimal = to_string(formula)
+        explicit = to_string(formula, explicit=True)
+        assert explicit.count("(") >= minimal.count("(")
+        assert explicit.replace("(", "").replace(")", "") == minimal.replace("(", "").replace(")", "")

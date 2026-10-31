@@ -206,7 +206,7 @@ def test_templates_escape_every_value_they_print():
             )
 
     success = {
-        "ok": True, "canonical": hostile, "variables": [hostile], "row_count": 2,
+        "ok": True, "canonical": hostile, "display": hostile, "variables": [hostile], "row_count": 2,
         "true_count": 1, "classification": "contingency", "satisfiable": True,
         "rows_omitted": False,
         "rows": [{"assignment": {hostile: True}, "value": True},
@@ -251,3 +251,9 @@ def test_static_files_are_served(client, path):
     response = client.get(path)
     assert response.status_code == 200
     response.close()
+
+
+def test_page_shows_explicit_grouping(client):
+    _, html = page(client, "P → Q ∧ ¬R")
+    assert "Read as: <code>P → (Q ∧ ¬R)</code>" in html
+    assert '<th scope="col" class="formula-col">P → (Q ∧ ¬R)</th>' in html
