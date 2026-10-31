@@ -1,0 +1,184 @@
+:root {
+    color-scheme: light dark;
+    --bg: #fbfaf7;
+    --surface: #ffffff;
+    --text: #1f2430;
+    --muted: #5d6573;
+    --border: #d9d5cc;
+    --accent: #2f4f9e;
+    --accent-text: #ffffff;
+    --yes-bg: #e3f1e4;
+    --yes-text: #1d5a27;
+    --no-bg: #f7e4e1;
+    --no-text: #8a2a1d;
+    --warn-bg: #fff3d6;
+    --warn-border: #e2c46b;
+    --error-bg: #fdecea;
+    --error-border: #e0a39b;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #16181d;
+        --surface: #1f232b;
+        --text: #e6e8ec;
+        --muted: #a0a7b4;
+        --border: #3a404c;
+        --accent: #7d9cf0;
+        --accent-text: #11141b;
+        --yes-bg: #1f3a24;
+        --yes-text: #9fdca8;
+        --no-bg: #442421;
+        --no-text: #f2b1a9;
+        --warn-bg: #3b3318;
+        --warn-border: #7a6a2c;
+        --error-bg: #3d2220;
+        --error-border: #7e4a45;
+    }
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+}
+
+.site-header, main {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.site-header { padding-top: 1.5rem; }
+.site-header h1 { margin: 0; font-size: 1.6rem; }
+.site-header h1 a { color: inherit; text-decoration: none; }
+.site-header p { margin: 0.1rem 0 0; color: var(--muted); }
+
+main { padding-bottom: 3rem; }
+h2 { font-size: 1.15rem; margin: 1.75rem 0 0.5rem; }
+
+code, pre, .truth-table {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+}
+
+code { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0 0.3em; }
+
+.formula-form { display: flex; gap: 0.5rem; }
+
+input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    font-size: 1.15rem;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+    padding: 0.6rem 1.1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+button[type="submit"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+}
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.symbols { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.symbols[hidden] { display: none; }
+.symbols button { min-width: 2.6rem; padding: 0.35rem 0.6rem; font-size: 1.1rem; }
+
+.hint { color: var(--muted); font-size: 0.9rem; margin: 0.8rem 0 0; }
+
+.examples { padding-left: 1.2rem; }
+.examples li { margin: 0.35rem 0; }
+.examples a { color: var(--accent); }
+
+.canonical { margin: 0 0 0.4rem; }
+.verdict { margin: 0.2rem 0; font-size: 1.05rem; }
+.meta { color: var(--muted); font-size: 0.9rem; margin: 0.2rem 0 0.8rem; }
+
+.badge {
+    display: inline-block;
+    padding: 0.05rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    text-transform: capitalize;
+}
+.badge.tautology { background: var(--yes-bg); color: var(--yes-text); border-color: var(--yes-text); }
+.badge.contradiction { background: var(--no-bg); color: var(--no-text); border-color: var(--no-text); }
+.badge.contingency { background: var(--surface); color: var(--text); }
+
+.table-wrap { overflow-x: auto; }
+
+.truth-table {
+    border-collapse: collapse;
+    background: var(--surface);
+    font-size: 1.05rem;
+}
+
+.truth-table th, .truth-table td {
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.8rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.truth-table th { background: var(--bg); font-weight: 600; }
+.truth-table td.yes { background: var(--yes-bg); color: var(--yes-text); }
+.truth-table td.no { background: var(--no-bg); color: var(--no-text); }
+.truth-table .formula-col { border-left: 3px double var(--border); font-weight: 700; }
+
+.notice {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+}
+
+.error {
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 6px;
+    padding: 0.2rem 1rem 0.8rem;
+    margin-top: 1.5rem;
+}
+.error h2 { margin-top: 0.8rem; }
+
+.error-context {
+    margin: 0.4rem 0;
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 1.05rem;
+}
+.error-context .caret { color: var(--no-text); font-weight: 700; }
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
