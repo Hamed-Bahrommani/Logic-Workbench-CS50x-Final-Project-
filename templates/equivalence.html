@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import cell %}
+
+{% block title %}Equivalence · Logic Workbench{% endblock %}
+
+{% block main %}
+<section aria-labelledby="formula-heading">
+    <h2 id="formula-heading">Are two formulas equivalent?</h2>
+    <form method="get" action="{{ url_for('equivalence') }}" class="stack-form">
+        <label for="left">First formula</label>
+        <input type="text" id="left" name="left" class="formula-input" value="{{ left }}"
+               placeholder="P → Q" autocomplete="off" spellcheck="false" autofocus>
+
+        <label for="right">Second formula</label>
+        <input type="text" id="right" name="right" class="formula-input" value="{{ right }}"
+               placeholder="¬P ∨ Q" autocomplete="off" spellcheck="false">
+
+        <div><button type="submit">Compare</button></div>
+    </form>
+    {% include "_symbols.html" %}
+</section>
+
+{% if result is none %}
+<section aria-labelledby="examples-heading">
+    <h2 id="examples-heading">Try an example</h2>
+    <ul class="examples">
+        {% for example in examples %}
+        <li>
+            <a href="{{ url_for('equivalence', left=example.left, right=example.right) }}">
+                <code>{{ example.left }}</code> and <code>{{ example.right }}</code>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% elif not result.ok %}
+{% include "_error.html" %}
+
+{% else %}
+<section aria-labelledby="result-heading">
+    <h2 id="result-heading">Result</h2>
+    <p class="canonical">First: <code>{{ result.left.display }}</code></p>
+    <p class="canonical">Second: <code>{{ result.right.display }}</code></p>
+
+    {% if result.equivalent %}
+    <p class="verdict">
+        <span class="badge good">Equivalent</span>
+        The two formulas have the same truth value under every assignment.
+    </p>
+    {% else %}
+    <p class="verdict">
+        <span class="badge bad">Not equivalent</span>
+        This is the first assignment (in truth-table order) where they differ.
+    </p>
+    <div class="table-wrap">
+        <table class="truth-table">
+            <caption class="visually-hidden">An assignment that distinguishes the two formulas</caption>
+            <thead>
+                <tr>
+                    {% for name in result.variables %}
+                    <th scope="col">{{ name }}</th>
+                    {% endfor %}
+                    <th scope="col" class="formula-col">{{ result.left.display }}</th>
+                    <th scope="col">{{ result.right.display }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for name in result.variables %}
+                    {{ cell(result.distinguishing.assignment[name]) }}
+                    {% endfor %}
+                    {{ cell(result.distinguishing.left_value, "formula-col ") }}
+                    {{ cell(result.distinguishing.right_value) }}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}

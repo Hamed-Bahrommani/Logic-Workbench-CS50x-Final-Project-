@@ -48,3 +48,12 @@ class Iff:
 
 
 Formula = Var | Bot | Not | And | Or | Imp | Iff
+
+
+def node_count(formula: Formula) -> int:
+    """The number of nodes in the tree: each variable, ⊥ and connective counts as one."""
+    if isinstance(formula, (Var, Bot)):
+        return 1
+    if isinstance(formula, Not):
+        return 1 + node_count(formula.child)
+    return 1 + node_count(formula.left) + node_count(formula.right)

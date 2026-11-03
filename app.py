@@ -11,9 +11,10 @@ from logic import api
 
 app = Flask(__name__)
 
-# The engine caps variables and nesting; this caps the raw size of what a
+# The engine caps variables and nesting; these cap the raw size of what a
 # visitor can send, before any parsing happens.
-MAX_INPUT_LENGTH = 1000
+MAX_INPUT_LENGTH = 1000                       # one formula
+MAX_PREMISES_TEXT = 20 * MAX_INPUT_LENGTH     # the whole list of premises
 
 EXAMPLES = [
     "P → (Q ∧ ¬R)",
@@ -27,6 +28,31 @@ CLASSIFICATION_HELP = {
     "contradiction": "false under every assignment",
     "contingency": "true under some assignments and false under others",
 }
+
+EQUIVALENCE_EXAMPLES = [
+    {"left": "P → Q", "right": "¬P ∨ Q"},
+    {"left": "¬(P ∧ Q)", "right": "¬P ∨ ¬Q"},
+    {"left": "P → (Q → R)", "right": "(P ∧ Q) → R"},
+    {"left": "P → Q", "right": "Q → P"},
+]
+
+
+def _argument_example(premises: list[str], conclusion: str) -> dict:
+    return {
+        "premises": "\n".join(premises),
+        "conclusion": conclusion,
+        "label": ", ".join(premises) + " ∴ " + conclusion,
+    }
+
+
+ARGUMENT_EXAMPLES = [
+    _argument_example(["P → Q", "P"], "Q"),
+    _argument_example(["P → Q", "Q"], "P"),
+    _argument_example(["P ∨ Q", "¬P"], "Q"),
+    _argument_example(["P ∧ ¬P"], "Q"),
+]
+
+FIELD_LABELS = {"left": "First formula", "right": "Second formula", "conclusion": "Conclusion"}
 
 
 @app.get("/")
@@ -43,7 +69,7 @@ def index():
     result = None
     error_context = None
     if submitted:
-        result = _compute(text)
+        result = _length_error(text, "formula") or api.truth_table(text)
         if not result["ok"]:
             error_context = _error_context(text, result["error"].get("position"))
 
@@ -57,17 +83,112 @@ def index():
     )
 
 
-def _compute(text: str) -> dict:
-    if len(text) > MAX_INPUT_LENGTH:
-        return {
-            "ok": False,
-            "error": {
-                "code": "INPUT_TOO_LONG",
-                "message": f"The formula is too long ({len(text)} characters; "
-                           f"the limit is {MAX_INPUT_LENGTH}).",
-            },
-        }
-    return api.truth_table(text)
+@app.get("/equivalence")
+def equivalence():
+    """Are two formulas equivalent? If not, show the first assignment that tells them apart."""
+    submitted = "left" in request.args or "right" in request.args
+    left = request.args.get("left", "")
+    right = request.args.get("right", "")
+
+    result = None
+    error_context = None
+    error_label = None
+    if submitted:
+        result = (
+            _length_error(left, "formula", "left")
+            or _length_error(right, "formula", "right")
+            or api.equivalent(left, right)
+        )
+        if not result["ok"]:
+            error_context, error_label = _field_error(
+                result["error"], {"left": left, "right": right}
+            )
+
+    return render_template(
+        "equivalence.html",
+        left=left,
+        right=right,
+        result=result,
+        error_context=error_context,
+        error_label=error_label,
+        examples=EQUIVALENCE_EXAMPLES,
+    )
+
+
+@app.get("/argument")
+def argument():
+    """Is an argument valid? If not, show a countermodel."""
+    submitted = "premises" in request.args or "conclusion" in request.args
+    premises_text = request.args.get("premises", "")
+    conclusion = request.args.get("conclusion", "")
+    # Blank lines are ignored, so premise numbers count only the non-blank lines.
+    premises = _premise_lines(premises_text) if len(premises_text) <= MAX_PREMISES_TEXT else []
+
+    result = None
+    error_context = None
+    error_label = None
+    if submitted:
+        result = _check_argument(premises_text, premises, conclusion)
+        if not result["ok"]:
+            fields = {f"premise-{number}": line for number, line in enumerate(premises, start=1)}
+            fields["conclusion"] = conclusion
+            error_context, error_label = _field_error(result["error"], fields)
+
+    return render_template(
+        "argument.html",
+        premises_text=premises_text,
+        conclusion=conclusion,
+        result=result,
+        error_context=error_context,
+        error_label=error_label,
+        examples=ARGUMENT_EXAMPLES,
+    )
+
+
+def _premise_lines(text: str) -> list[str]:
+    return [line.strip() for line in text.splitlines() if line.strip()]
+
+
+def _check_argument(premises_text: str, premises: list[str], conclusion: str) -> dict:
+    too_long = _length_error(premises_text, "list of premises", limit=MAX_PREMISES_TEXT)
+    if too_long:
+        return too_long
+    for number, line in enumerate(premises, start=1):
+        too_long = _length_error(line, "premise", f"premise-{number}")
+        if too_long:
+            return too_long
+    return _length_error(conclusion, "conclusion", "conclusion") or api.valid(premises, conclusion)
+
+
+def _length_error(
+    text: str, what: str, field: str | None = None, limit: int = MAX_INPUT_LENGTH
+) -> dict | None:
+    """An error result if `text` is over `limit` characters, otherwise None."""
+    if len(text) <= limit:
+        return None
+    error = {
+        "code": "INPUT_TOO_LONG",
+        "message": f"The {what} is too long ({len(text)} characters; the limit is {limit}).",
+    }
+    if field is not None:
+        error["field"] = field
+    return {"ok": False, "error": error}
+
+
+def _field_label(field: str | None) -> str | None:
+    if field is None:
+        return None
+    if field.startswith("premise-"):
+        return "Premise " + field.removeprefix("premise-")
+    return FIELD_LABELS.get(field, field)
+
+
+def _field_error(error: dict, fields: dict[str, str]) -> tuple[dict | None, str | None]:
+    """The caret display and the label for an error that may name one of several inputs."""
+    field = error.get("field")
+    text = fields.get(field) if field is not None else None
+    context = _error_context(text, error.get("position")) if text is not None else None
+    return context, _field_label(field)
 
 
 def _error_context(text: str, position: int | None) -> dict | None:

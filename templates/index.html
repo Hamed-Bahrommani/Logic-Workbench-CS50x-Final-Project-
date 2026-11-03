@@ -1,33 +1,17 @@
 {% extends "layout.html" %}
+{% from "_macros.html" import cell %}
 
 {% block main %}
 <section aria-labelledby="formula-heading">
     <h2 id="formula-heading">Formula</h2>
     <form method="get" action="{{ url_for('index') }}" class="formula-form">
         <label for="formula" class="visually-hidden">Propositional formula</label>
-        <input type="text" id="formula" name="formula" value="{{ text }}"
+        <input type="text" id="formula" name="formula" class="formula-input" value="{{ text }}"
                placeholder="P → (Q ∧ ¬R)" autocomplete="off" spellcheck="false"
                autofocus>
         <button type="submit">Compute</button>
     </form>
-
-    <div id="symbols" class="symbols" hidden aria-label="Insert a symbol">
-        <button type="button" data-insert="¬" aria-label="not">¬</button>
-        <button type="button" data-insert="∧" aria-label="and">∧</button>
-        <button type="button" data-insert="∨" aria-label="or">∨</button>
-        <button type="button" data-insert="→" aria-label="implies">→</button>
-        <button type="button" data-insert="↔" aria-label="if and only if">↔</button>
-        <button type="button" data-insert="⊥" aria-label="falsum">⊥</button>
-        <button type="button" data-insert="(" aria-label="open parenthesis">(</button>
-        <button type="button" data-insert=")" aria-label="close parenthesis">)</button>
-    </div>
-
-    <p class="hint">
-        You can also type <code>~</code> <code>&amp;</code> <code>|</code>
-        <code>-&gt;</code> <code>&lt;-&gt;</code> <code>_|_</code>
-        for ¬ ∧ ∨ → ↔ ⊥. Variables are names like <code>P</code> or <code>rain</code>;
-        <code>T</code> and <code>F</code> are reserved.
-    </p>
+    {% include "_symbols.html" %}
 </section>
 
 {% if result is none %}
@@ -41,18 +25,7 @@
 </section>
 
 {% elif not result.ok %}
-<section class="error" role="alert" aria-labelledby="error-heading">
-    <h2 id="error-heading">That formula can't be computed</h2>
-    {% if error_context %}
-    <pre class="error-context"><span class="line">{{ error_context.line }}</span>
-<span class="caret">{{ error_context.caret }}</span></pre>
-    {% endif %}
-    <p>{{ result.error.message }}</p>
-    <p class="meta">
-        Error code <code>{{ result.error.code }}</code>{% if result.error.position is defined %},
-        position {{ result.error.position }}{% endif %}
-    </p>
-</section>
+{% include "_error.html" %}
 
 {% else %}
 <section aria-labelledby="result-heading">
@@ -91,9 +64,9 @@
                 {% for row in result.rows %}
                 <tr>
                     {% for name in result.variables %}
-                    <td class="{{ 'yes' if row.assignment[name] else 'no' }}">{{ 'T' if row.assignment[name] else 'F' }}</td>
+                    {{ cell(row.assignment[name]) }}
                     {% endfor %}
-                    <td class="formula-col {{ 'yes' if row.value else 'no' }}">{{ 'T' if row.value else 'F' }}</td>
+                    {{ cell(row.value, "formula-col ") }}
                 </tr>
                 {% endfor %}
             </tbody>

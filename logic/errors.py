@@ -17,17 +17,22 @@ class FormulaError(Exception):
     """A syntax problem, with the 0-based index of the offending character.
 
     For problems at the end of the input the position is len(text).
+    `field` names which input the problem is in when an operation takes
+    several (for example "left" or "premise-2"); it is None otherwise.
     """
 
-    def __init__(self, code: str, message: str, position: int):
+    def __init__(self, code: str, message: str, position: int, field: str | None = None):
         super().__init__(message)
         self.code = code
         self.message = message
         self.position = position
+        self.field = field
 
     def to_dict(self) -> dict:
-        return {"code": self.code, "message": self.message, "position": self.position}
-
+        error = {"code": self.code, "message": self.message, "position": self.position}
+        if self.field is not None:
+            error["field"] = self.field
+        return error
 
 class LimitExceeded(Exception):
     """The input is valid but too large to compute (too many variables)."""

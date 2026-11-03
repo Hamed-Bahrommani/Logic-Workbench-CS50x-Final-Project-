@@ -1,0 +1,5 @@
+{# One truth-value cell. The letter is in the text, so colour is never the only signal.
+   `prefix` goes before the yes/no class, e.g. "formula-col ". #}
+{% macro cell(value, prefix="") -%}
+<td class="{{ prefix }}{{ 'yes' if value else 'no' }}">{{ 'T' if value else 'F' }}</td>
+{%- endmacro %}

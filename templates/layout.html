@@ -11,6 +11,11 @@
         <h1><a href="{{ url_for('index') }}">Logic Workbench</a></h1>
         <p>A learning environment for propositional logic</p>
     </header>
+    <nav class="site-nav" aria-label="Tools">
+        <a href="{{ url_for('index') }}"{% if request.endpoint == 'index' %} aria-current="page"{% endif %}>Truth table</a>
+        <a href="{{ url_for('equivalence') }}"{% if request.endpoint == 'equivalence' %} aria-current="page"{% endif %}>Equivalence</a>
+        <a href="{{ url_for('argument') }}"{% if request.endpoint == 'argument' %} aria-current="page"{% endif %}>Argument</a>
+    </nav>
     <main>
         {% block main %}{% endblock %}
     </main>

@@ -182,3 +182,56 @@ button[type="submit"] {
     clip: rect(0 0 0 0);
     white-space: nowrap;
 }
+
+/* --- navigation between tools --- */
+
+.site-nav {
+    max-width: 46rem;
+    margin: 0.8rem auto 0;
+    padding: 0 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.site-nav a {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    background: var(--surface);
+}
+.site-nav a[aria-current="page"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+}
+
+/* --- forms with more than one field --- */
+
+.stack-form { display: flex; flex-direction: column; gap: 0.35rem; }
+.stack-form label { font-weight: 600; margin-top: 0.4rem; }
+.stack-form input[type="text"] { flex: none; }
+.stack-form button { margin-top: 0.5rem; }
+
+textarea.formula-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    font-size: 1.15rem;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    resize: vertical;
+}
+
+/* --- verdict badges for yes/no answers --- */
+
+.badge.good { background: var(--yes-bg); color: var(--yes-text); border-color: var(--yes-text); }
+.badge.bad { background: var(--no-bg); color: var(--no-text); border-color: var(--no-text); }
+
+.premise-list { margin: 0.2rem 0 0.6rem; padding-left: 1.6rem; }
+.premise-list li { margin: 0.2rem 0; }

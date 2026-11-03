@@ -1,0 +1,16 @@
+{# Shown when the engine refuses a request. Needs: result, error_context, error_label. #}
+<section class="error" role="alert" aria-labelledby="error-heading">
+    <h2 id="error-heading">That formula can't be computed</h2>
+    {% if error_label %}
+    <p class="meta">Problem in: <strong>{{ error_label }}</strong></p>
+    {% endif %}
+    {% if error_context %}
+    <pre class="error-context"><span class="line">{{ error_context.line }}</span>
+<span class="caret">{{ error_context.caret }}</span></pre>
+    {% endif %}
+    <p>{{ result.error.message }}</p>
+    <p class="meta">
+        Error code <code>{{ result.error.code }}</code>{% if result.error.position is defined %},
+        position {{ result.error.position }}{% endif %}
+    </p>
+</section>

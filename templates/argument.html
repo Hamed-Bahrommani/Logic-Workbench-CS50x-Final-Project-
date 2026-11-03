@@ -1,0 +1,104 @@
+{% extends "layout.html" %}
+{% from "_macros.html" import cell %}
+
+{% block title %}Argument validity · Logic Workbench{% endblock %}
+
+{% block main %}
+<section aria-labelledby="formula-heading">
+    <h2 id="formula-heading">Is the argument valid?</h2>
+    <form method="get" action="{{ url_for('argument') }}" class="stack-form">
+        <label for="premises">Premises (one per line; leave empty for none)</label>
+        <textarea id="premises" name="premises" class="formula-input" rows="4"
+                  placeholder="P → Q&#10;P" autocomplete="off" spellcheck="false">{{ premises_text }}</textarea>
+
+        <label for="conclusion">Conclusion</label>
+        <input type="text" id="conclusion" name="conclusion" class="formula-input"
+               value="{{ conclusion }}" placeholder="Q" autocomplete="off" spellcheck="false">
+
+        <div><button type="submit">Check</button></div>
+    </form>
+    {% include "_symbols.html" %}
+</section>
+
+{% if result is none %}
+<section aria-labelledby="examples-heading">
+    <h2 id="examples-heading">Try an example</h2>
+    <ul class="examples">
+        {% for example in examples %}
+        <li>
+            <a href="{{ url_for('argument', premises=example.premises, conclusion=example.conclusion) }}">
+                <code>{{ example.label }}</code>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% elif not result.ok %}
+{% include "_error.html" %}
+
+{% else %}
+<section aria-labelledby="result-heading">
+    <h2 id="result-heading">Result</h2>
+
+    {% if result.premises %}
+    <p class="meta">Premises:</p>
+    <ol class="premise-list">
+        {% for premise in result.premises %}
+        <li><code>{{ premise.display }}</code></li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="meta">No premises.</p>
+    {% endif %}
+    <p class="canonical">Conclusion: <code>{{ result.conclusion.display }}</code></p>
+
+    {% if result.valid %}
+    <p class="verdict">
+        <span class="badge good">Valid</span>
+        {% if result.premises %}Every assignment that makes all the premises true also makes the conclusion true.
+        {% else %}With no premises, validity means the conclusion is true under every assignment.{% endif %}
+    </p>
+    {% if result.vacuous %}
+    <p class="notice">
+        The premises contradict each other, so no assignment makes them all true.
+        The argument is valid only vacuously: anything follows from a contradiction.
+    </p>
+    {% endif %}
+    {% else %}
+    <p class="verdict">
+        <span class="badge bad">Invalid</span>
+        {% if result.premises %}This is the first assignment (in truth-table order) that makes every premise true and the conclusion false.
+        {% else %}This is the first assignment that makes the conclusion false.{% endif %}
+    </p>
+    <div class="table-wrap">
+        <table class="truth-table">
+            <caption class="visually-hidden">A countermodel to the argument</caption>
+            <thead>
+                <tr>
+                    {% for name in result.variables %}
+                    <th scope="col">{{ name }}</th>
+                    {% endfor %}
+                    {% for premise in result.premises %}
+                    <th scope="col">{{ premise.display }}</th>
+                    {% endfor %}
+                    <th scope="col" class="formula-col">{{ result.conclusion.display }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for name in result.variables %}
+                    {{ cell(result.countermodel.assignment[name]) }}
+                    {% endfor %}
+                    {% for value in result.countermodel.premise_values %}
+                    {{ cell(value) }}
+                    {% endfor %}
+                    {{ cell(result.countermodel.conclusion_value, "formula-col ") }}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}
