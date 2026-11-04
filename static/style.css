@@ -235,3 +235,19 @@ textarea.formula-input {
 
 .premise-list { margin: 0.2rem 0 0.6rem; padding-left: 1.6rem; }
 .premise-list li { margin: 0.2rem 0; }
+
+/* --- normal-form steps --- */
+
+.stack-form select {
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.steps { padding-left: 1.6rem; }
+.step { margin: 0 0 1rem; padding-left: 0.2rem; }
+.step p { margin: 0.2rem 0; }
+.step-law code { margin-left: 0.4rem; }

@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+
+{% block title %}Normal forms · Logic Workbench{% endblock %}
+
+{% block main %}
+<section aria-labelledby="formula-heading">
+    <h2 id="formula-heading">Rewrite into a normal form</h2>
+    <form method="get" action="{{ url_for('normal_form') }}" class="stack-form">
+        <label for="formula">Formula</label>
+        <input type="text" id="formula" name="formula" class="formula-input" value="{{ text }}"
+               placeholder="P → (Q ∧ R)" autocomplete="off" spellcheck="false" autofocus>
+
+        <label for="strategy">Target form</label>
+        <select id="strategy" name="strategy">
+            {% for key, name in strategies.items() %}
+            <option value="{{ key }}"{% if key == strategy %} selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+
+        <div><button type="submit">Rewrite</button></div>
+    </form>
+    {% include "_symbols.html" %}
+</section>
+
+{% if result is none %}
+<section aria-labelledby="examples-heading">
+    <h2 id="examples-heading">Try an example</h2>
+    <ul class="examples">
+        {% for example in examples %}
+        <li>
+            <a href="{{ url_for('normal_form', formula=example.formula, strategy=example.strategy) }}">
+                <code>{{ example.formula }}</code> to {{ example.strategy|upper }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% elif not result.ok %}
+{% include "_error.html" %}
+
+{% else %}
+<section aria-labelledby="result-heading">
+    <h2 id="result-heading">Result</h2>
+    <p class="canonical">Start: <code>{{ result.start.display }}</code></p>
+
+    {% if result.already %}
+    <p class="verdict">
+        <span class="badge good">Already done</span>
+        This formula is already in {{ strategies[result.strategy]|lower }}, so no laws were needed.
+    </p>
+    {% else %}
+    <p class="meta">
+        Rewritten in {{ result.steps|length }} step{{ '' if result.steps|length == 1 else 's' }}.
+        Each step applies one law to one part of the formula.
+    </p>
+    <ol class="steps">
+        {% for step in result.steps %}
+        <li class="step">
+            <p class="step-law"><strong>{{ step.law }}</strong> <code>{{ step.statement }}</code></p>
+            <p><code>{{ step.before }}</code> becomes <code>{{ step.after }}</code></p>
+            <p class="meta">Whole formula: <code>{{ step.whole }}</code></p>
+        </li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+
+    <p class="canonical">Result: <code>{{ result.final.display }}</code></p>
+</section>
+{% endif %}
+{% endblock %}

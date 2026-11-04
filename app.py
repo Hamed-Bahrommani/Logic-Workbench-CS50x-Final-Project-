@@ -36,6 +36,19 @@ EQUIVALENCE_EXAMPLES = [
     {"left": "P → Q", "right": "Q → P"},
 ]
 
+NORMAL_FORMS = {
+    "nnf": "Negation normal form (NNF)",
+    "cnf": "Conjunctive normal form (CNF)",
+    "dnf": "Disjunctive normal form (DNF)",
+}
+
+NORMAL_FORM_EXAMPLES = [
+    {"formula": "P → (Q ∧ R)", "strategy": "cnf"},
+    {"formula": "¬(P → Q)", "strategy": "nnf"},
+    {"formula": "(P ∨ Q) ∧ (R ∨ S)", "strategy": "dnf"},
+    {"formula": "P ↔ Q", "strategy": "cnf"},
+]
+
 
 def _argument_example(premises: list[str], conclusion: str) -> dict:
     return {
@@ -142,6 +155,32 @@ def argument():
         error_context=error_context,
         error_label=error_label,
         examples=ARGUMENT_EXAMPLES,
+    )
+
+
+@app.get("/normal-form")
+def normal_form():
+    """Rewrite a formula into NNF, CNF or DNF, showing every law applied."""
+    submitted = "formula" in request.args
+    text = request.args.get("formula", "")
+    strategy = request.args.get("strategy", "cnf")
+
+    result = None
+    error_context = None
+    if submitted:
+        result = _length_error(text, "formula") or api.normal_form(text, strategy)
+        if not result["ok"]:
+            error_context = _error_context(text, result["error"].get("position"))
+
+    return render_template(
+        "normal_form.html",
+        text=text,
+        strategy=strategy,
+        strategies=NORMAL_FORMS,
+        result=result,
+        error_context=error_context,
+        error_label=None,
+        examples=NORMAL_FORM_EXAMPLES,
     )
 
 

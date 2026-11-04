@@ -21,6 +21,8 @@ from .nodes import And, Bot, Formula, Iff, Imp, Not, Or, Var
 from .parser import parse
 from .printer import to_string
 from .truth_table import build_truth_table
+from logic.errors import LIMIT_EXCEEDED
+from logic.rewrite import STRATEGIES, RewriteLimit, rewrite
 
 
 def _run(operation: Callable[[], dict]) -> dict:
@@ -114,6 +116,51 @@ def valid(premises: list[str], conclusion: str) -> dict:
         }
 
     return _run(operation)
+
+
+def _display(formula) -> str:
+    return to_string(formula, explicit=True)
+
+
+def normal_form(text: str, strategy: str) -> dict:
+    """Rewrite the formula in `text` to "nnf", "cnf" or "dnf", step by step.
+
+    Payload: strategy, start and final (each {canonical, display}), steps (a list
+    of {law, statement, before, after, whole}), already (True if no step was needed).
+    """
+    if strategy not in STRATEGIES:
+        return {
+            "ok": False,
+            "error": {
+                "code": "UNKNOWN_STRATEGY",
+                "message": f"unknown strategy {strategy!r}; use one of: {', '.join(STRATEGIES)}",
+            },
+        }
+
+    def operation() -> dict:
+        formula = parse(text)
+        outcome = rewrite(formula, strategy)
+        return {
+            "strategy": strategy,
+            "start": _describe(formula),
+            "steps": [
+                {
+                    "law": step.law.name,
+                    "statement": step.law.statement,
+                    "before": _display(step.before),
+                    "after": _display(step.after),
+                    "whole": _display(step.whole),
+                }
+                for step in outcome.steps
+            ],
+            "final": _describe(outcome.final),
+            "already": not outcome.steps,
+        }
+
+    try:
+        return _run(operation)
+    except RewriteLimit as err:
+        return {"ok": False, "error": {"code": LIMIT_EXCEEDED, "message": str(err)}}
 
 
 _NODE_NAMES = {Not: "not", And: "and", Or: "or", Imp: "imp", Iff: "iff"}
