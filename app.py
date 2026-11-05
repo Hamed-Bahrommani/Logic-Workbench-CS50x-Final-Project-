@@ -9,6 +9,8 @@ from flask import Flask, render_template, request
 
 from logic import api
 
+from logic.proof import ALL_RULES
+
 app = Flask(__name__)
 
 # The engine caps variables and nesting; these cap the raw size of what a
@@ -66,6 +68,73 @@ ARGUMENT_EXAMPLES = [
 ]
 
 FIELD_LABELS = {"left": "First formula", "right": "Second formula", "conclusion": "Conclusion"}
+
+
+
+MAX_PROOF_TEXT = 100 * MAX_INPUT_LENGTH
+
+PROOF_EXAMPLES = [
+    {
+        "label": "Modus ponens",
+        "premises": "P → Q\nP",
+        "conclusion": "Q",
+        "proof": "P → Q ; premise\nP ; premise\nQ ; ImpE 1,2",
+    },
+    {
+        "label": "Swap a conjunction",
+        "premises": "P ∧ Q",
+        "conclusion": "Q ∧ P",
+        "proof": "P ∧ Q ; premise\nP ; AndE 1\nQ ; AndE 1\nQ ∧ P ; AndI 3,2",
+    },
+    {
+        "label": "Anything follows from a contradiction",
+        "premises": "P\n¬P",
+        "conclusion": "Q",
+        "proof": "P ; premise\n¬P ; premise\n⊥ ; NotE 1,2\nQ ; BotE 3",
+    },
+    {
+        "label": "Chain two implications",
+        "premises": "P → Q\nQ → R\nP",
+        "conclusion": "R",
+        "proof": "P → Q ; premise\nQ → R ; premise\nP ; premise\nQ ; ImpE 1,3\nR ; ImpE 2,4",
+    },
+]
+
+PROOF_EXAMPLES += [
+    {
+        "label": "P implies P (a subproof)",
+        "premises": "",
+        "conclusion": "P → P",
+        "proof": "| P ; assume\nP → P ; ImpI 1-1",
+    },
+    {
+        "label": "Contraposition (nested subproofs)",
+        "premises": "P → Q",
+        "conclusion": "¬Q → ¬P",
+        "proof": "\n".join([
+            "P → Q ; premise",
+            "| ¬Q ; assume",
+            "| | P ; assume",
+            "| | Q ; ImpE 1,3",
+            "| | ⊥ ; NotE 4,2",
+            "| ¬P ; NotI 3-5",
+            "¬Q → ¬P ; ImpI 2-6",
+        ]),
+    },
+    {
+        "label": "Disjunction commutes (proof by cases)",
+        "premises": "P ∨ Q",
+        "conclusion": "Q ∨ P",
+        "proof": "\n".join([
+            "P ∨ Q ; premise",
+            "| P ; assume",
+            "| Q ∨ P ; OrI 2",
+            "| Q ; assume",
+            "| Q ∨ P ; OrI 4",
+            "Q ∨ P ; OrE 1,2-3,4-5",
+        ]),
+    },
+]
 
 
 @app.get("/")
@@ -183,6 +252,52 @@ def normal_form():
         examples=NORMAL_FORM_EXAMPLES,
     )
 
+
+@app.get("/proof")
+def proof_checker():
+    """Check a natural-deduction proof, line by line."""
+    submitted = any(key in request.args for key in ("premises", "conclusion", "proof"))
+    premises_text = request.args.get("premises", "")
+    conclusion = request.args.get("conclusion", "")
+    proof_text = request.args.get("proof", "")
+    premises = _premise_lines(premises_text) if len(premises_text) <= MAX_PREMISES_TEXT else []
+
+    result = None
+    error_context = None
+    error_label = None
+    if submitted:
+        result = _check_proof_request(premises_text, premises, conclusion, proof_text)
+        if not result["ok"]:
+            fields = {f"premise-{number}": line for number, line in enumerate(premises, start=1)}
+            fields["conclusion"] = conclusion
+            error_context, error_label = _field_error(result["error"], fields)
+
+    return render_template(
+        "proof.html",
+        premises_text=premises_text,
+        conclusion=conclusion,
+        proof_text=proof_text,
+        result=result,
+        error_context=error_context,
+        error_label=error_label,
+        examples=PROOF_EXAMPLES,
+        rules=ALL_RULES,
+    )
+
+
+def _check_proof_request(premises_text, premises, conclusion, proof_text) -> dict:
+    too_long = _length_error(premises_text, "list of premises", limit=MAX_PREMISES_TEXT)
+    if too_long:
+        return too_long
+    for number, line in enumerate(premises, start=1):
+        too_long = _length_error(line, "premise", f"premise-{number}")
+        if too_long:
+            return too_long
+    return (
+        _length_error(conclusion, "conclusion", "conclusion")
+        or _length_error(proof_text, "proof", limit=MAX_PROOF_TEXT)
+        or api.check_proof(premises, conclusion, proof_text)
+    )
 
 def _premise_lines(text: str) -> list[str]:
     return [line.strip() for line in text.splitlines() if line.strip()]

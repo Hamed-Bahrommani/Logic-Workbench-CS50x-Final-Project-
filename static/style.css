@@ -251,3 +251,38 @@ textarea.formula-input {
 .step { margin: 0 0 1rem; padding-left: 0.2rem; }
 .step p { margin: 0.2rem 0; }
 .step-law code { margin-left: 0.4rem; }
+
+/* --- proof checker --- */
+
+.proof-lines { padding-left: 1.6rem; }
+.proof-line {
+    margin: 0 0 0.6rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+}
+.proof-line.ok { border-left: 4px solid var(--yes-text); }
+.proof-line.bad { border-left: 4px solid var(--no-text); background: var(--error-bg); }
+.proof-line p { margin: 0.2rem 0; }
+.proof-line .mark { font-weight: 700; margin-right: 0.4rem; }
+.proof-line.ok .mark { color: var(--yes-text); }
+.proof-line.bad .mark { color: var(--no-text); }
+.proof-line .rule { color: var(--muted); margin-left: 0.6rem; }
+.line-error { color: var(--no-text); }
+
+.rule-reference { margin-top: 2rem; }
+.rule-reference summary { cursor: pointer; font-weight: 600; }
+.rule-table { border-collapse: collapse; margin-top: 0.6rem; }
+.rule-table th, .rule-table td {
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.7rem;
+    text-align: left;
+}
+
+
+.proof-line .bars {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+    color: var(--muted);
+    white-space: pre;
+}

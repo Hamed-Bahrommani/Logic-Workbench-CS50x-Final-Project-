@@ -23,6 +23,7 @@ from .printer import to_string
 from .truth_table import build_truth_table
 from logic.errors import LIMIT_EXCEEDED
 from logic.rewrite import STRATEGIES, RewriteLimit, rewrite
+from logic.proof import MAX_PROOF_LINES, check_lines, split_proof_text
 
 
 def _run(operation: Callable[[], dict]) -> dict:
@@ -162,6 +163,41 @@ def normal_form(text: str, strategy: str) -> dict:
     except RewriteLimit as err:
         return {"ok": False, "error": {"code": LIMIT_EXCEEDED, "message": str(err)}}
 
+
+def _request_error(code: str, message: str) -> dict:
+    return {"ok": False, "error": {"code": code, "message": message}}
+
+
+def check_proof(premises: list[str], conclusion: str, proof_text: str) -> dict:
+    """Check a natural-deduction proof (Stage A: no subproofs).
+
+    A bad premise or conclusion is an error for the whole request. A bad proof
+    line is part of the result: see logic.proof.check_lines for the payload,
+    plus premises and conclusion ({canonical, display}).
+    """
+    entries = split_proof_text(proof_text)
+    if not entries:
+        return _request_error("EMPTY_PROOF", "write at least one proof line")
+    if len(entries) > MAX_PROOF_LINES:
+        return _request_error(
+            LIMIT_EXCEEDED,
+            f"the proof has {len(entries)} lines; the limit is {MAX_PROOF_LINES}",
+        )
+
+    def operation() -> dict:
+        check_premise_count(len(premises))
+        parsed = [
+            _parse_field(text, f"premise-{number}")
+            for number, text in enumerate(premises, start=1)
+        ]
+        goal = _parse_field(conclusion, "conclusion")
+        return {
+            "premises": [_describe(p) for p in parsed],
+            "conclusion": _describe(goal),
+            **check_lines(parsed, goal, entries),
+        }
+
+    return _run(operation)
 
 _NODE_NAMES = {Not: "not", And: "and", Or: "or", Imp: "imp", Iff: "iff"}
 

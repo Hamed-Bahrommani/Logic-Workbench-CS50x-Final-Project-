@@ -16,6 +16,7 @@
         <a href="{{ url_for('equivalence') }}"{% if request.endpoint == 'equivalence' %} aria-current="page"{% endif %}>Equivalence</a>
         <a href="{{ url_for('argument') }}"{% if request.endpoint == 'argument' %} aria-current="page"{% endif %}>Argument</a>
         <a href="{{ url_for('normal_form') }}"{% if request.endpoint == 'normal_form' %} aria-current="page"{% endif %}>Normal forms</a>
+        <a href="{{ url_for('proof_checker') }}"{% if request.endpoint == 'proof_checker' %} aria-current="page"{% endif %}>Proof checker</a>
     </nav>
     <main>
         {% block main %}{% endblock %}
