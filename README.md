@@ -1,60 +1,116 @@
 # Logic Workbench
 
-#### Video Demo: <PASTE YOUR VIDEO URL HERE>
+#### Description
 
-#### Description:
+Logic Workbench is a web application for learning classical propositional logic. Enter a formula such as `P → (Q ∧ ¬R)` to explore its meaning, test logical relationships, transform it into normal forms, or verify a natural-deduction proof.
 
-Logic Workbench is a web application for learning classical propositional logic. You type a formula, such as `P → (Q ∧ ¬R)`, and the site shows you what it means and lets you test your reasoning against it. It has six tools:
+The application provides six tools:
 
-- **Truth table:** classifies a formula as a tautology, a contradiction or a contingency.
-- **Equivalence:** decides whether two formulas are equivalent and, if not, shows the first assignment that tells them apart.
-- **Argument validity:** decides whether premises entail a conclusion and, if not, shows a countermodel. It flags arguments that are valid only because the premises contradict each other.
-- **Normal forms:** rewrites a formula into NNF, CNF or DNF one step at a time, naming the law used at each step.
-- **Proof checker:** checks a natural-deduction proof line by line, including nested subproofs.
-- **Exercises:** fifteen graded proof problems, with hints, stored solutions and an anonymous attempt history.
+- **Truth tables:** Evaluates formulas, displays their truth tables, and classifies them as tautologies, contradictions, or contingencies.
+- **Equivalence:** Compares two formulas and provides a distinguishing assignment when they are not equivalent.
+- **Argument validity:** Tests whether a conclusion follows from a set of premises. Invalid arguments receive a countermodel, while vacuously valid arguments are explicitly identified.
+- **Normal forms:** Rewrites formulas into negation normal form (NNF), conjunctive normal form (CNF), or disjunctive normal form (DNF), showing the law applied at each step.
+- **Proof checker:** Verifies natural-deduction proofs line by line, including nested subproofs, assumptions, discharged ranges, and inference rules.
+- **Exercises:** Offers fifteen progressively challenging proof problems with hints, reference solutions, and anonymous attempt history.
 
-The project is built with Flask, SQLite and pure Python. The reasoning engine is tested without a web server. The rule set follows Huth & Ryan, *Logic in Computer Science* (<EDITION>), with `IffI` and `IffE` added as derived rules.
+The application is built with Flask, SQLite, HTML, CSS, JavaScript, and a pure-Python propositional-logic engine. The engine is independent of the web framework and can be tested directly.
 
-## Files
+The proof-rule conventions are based on Huth and Ryan's *Logic in Computer Science*. `IffI` and `IffE` are additional rules implemented for this project.
 
-- `app.py`: the Flask routes. It validates sizes, calls the engine, and renders templates. It contains no logic of its own.
-- `storage.py`: the SQLite layer for exercise attempts. Every query is parameterised, and old attempts are pruned.
-- `exercises.py` and `exercises.json`: the exercise data and its loader. The loader checks structure; the tests check that every exercise is a valid argument with a working stored solution.
-- `logic/`: the engine, importable on its own.
-  - `errors.py`, `tokens.py`, `nodes.py`: error types, token kinds and the immutable syntax tree.
-  - `lexer.py`, `parser.py`: a hand-written lexer and a Pratt parser with precedence and associativity rules, ASCII aliases for every symbol, and a nesting limit.
-  - `printer.py`: prints a tree with minimal parentheses, or with explicit grouping for readability.
-  - `evaluate.py`, `truth_table.py`, `checks.py`: evaluation, truth tables, equivalence and validity.
-  - `rewrite.py`: the named laws and the NNF, CNF and DNF strategies.
-  - `proof.py`: the proof checker.
-  - `api.py`: the only module the web layer talks to. It never raises; it returns `{"ok": True, ...}` or `{"ok": False, "error": ...}`.
-- `templates/` and `static/`: Jinja templates and one stylesheet, with dark mode and a small script that adds a symbol palette.
-- `tests/`: over 870 pytest tests.
+## Files and project structure
+
+### Application files
+
+- `app.py`: Defines the Flask routes, handles requests, validates input limits, calls the logic API, and renders the appropriate templates.
+- `storage.py`: Implements SQLite persistence for exercise attempts, including parameterized queries and history pruning.
+- `exercises.py`: Loads and structurally validates the exercise definitions.
+- `exercises.json`: Contains the fifteen exercises, their premises, conclusions, hints, and reference solutions.
+- `requirements.txt`: Lists the Python dependencies.
+- `pytest.ini`: Configures pytest's test discovery and Python import path.
+- `.gitignore`: Excludes generated files, local databases, virtual environments, and secrets.
+
+### Logic engine (`logic/`)
+
+The engine is deliberately separated from Flask:
+
+- `errors.py`: Defines structured formula errors, diagnostic codes, messages, and source positions.
+- `tokens.py`: Defines token types, operator aliases, and canonical symbol spellings.
+- `nodes.py`: Defines the immutable abstract syntax tree (AST) and its node types.
+- `lexer.py`: Tokenizes formulas and records character positions.
+- `parser.py`: Implements a Pratt parser with explicit operator precedence, associativity, parenthesis handling, and nesting limits.
+- `printer.py`: Produces canonical formulas while preserving AST structure, with a separate representation that makes grouping explicit.
+- `evaluate.py`: Evaluates formulas under individual variable assignments.
+- `truth_table.py`: Generates truth-table assignments and computes formula classifications.
+- `checks.py`: Implements logical equivalence and argument-validity checks, including countermodels.
+- `rewrite.py`: Implements named equivalence laws and the NNF, CNF, and DNF transformation strategies.
+- `proof.py`: Implements the natural-deduction proof checker, including inference rules and subproof scope management.
+- `api.py`: Provides the public interface between Flask and the engine. It converts successful results and errors into structured responses rather than exposing internal exceptions.
+
+### Web interface
+
+The `templates/` directory contains the Jinja templates:
+
+- `layout.html`: Shared page structure, title block, header, and navigation.
+- `index.html`: Formula input and truth-table results.
+- `equivalence.html`: Formula comparison interface and distinguishing assignments.
+- `argument.html`: Premise and conclusion input and validity results.
+- `normal_form.html`: Normal-form selection and transformation steps.
+- `proof.html`: Proof input, instructions, and verification results.
+- `exercises.html`: Exercise catalogue and overall progress.
+- `exercise.html`: Individual exercise, hint, proof submission, attempts, and reference solution.
+- `_macros.html`: Reusable template macros, including truth-table cells.
+- `_symbols.html`: Symbol palette for inserting logical operators.
+- `_error.html`: Consistent presentation of formula and request errors.
+- `_proof_lines.html`: Displays proof lines, scope indentation, rule references, and diagnostics.
+- `_share_link.html`: Reusable copy-link control for shareable results.
+
+The `static/` directory contains:
+
+- `style.css`: Application styling, responsive layouts, light and dark themes, animations, and accessibility refinements.
+- `app.js`: Symbol-palette interactions, formula-field targeting, and copy-link functionality.
+
+### Tests (`tests/`)
+
+Contains the pytest suite covering the formula language, parser and printer, evaluation, truth tables, equivalence, validity, rewriting, proof verification, Flask routes, persistence, security, and HTML rendering.
 
 ## Design decisions
 
-**The engine is separate from the web layer.** Every rule of logic lives in `logic/` and is tested directly. The Flask layer only translates between forms and results. That is why the tests run in about ten seconds.
+**Separation of concerns.** The reasoning engine has no Flask dependencies. This keeps logical correctness independently testable and prevents web-layer concerns from leaking into the implementation of logical rules.
 
-**Errors are data.** The engine returns errors with a code, a message and a position, and the page draws a caret under the mistake. Proof lines are judged independently, so one run reports every error, and a mistake on one line does not cascade into the lines after it.
+**Structural formulas.** Formulas are represented as immutable ASTs. Consequently, structurally different expressions remain different even when they are logically equivalent. The canonical printer preserves this grouping when its output is parsed again.
 
-**Limits are explicit.** Formulas are capped at 1,000 characters, 100 levels of nesting, and 16 variables. Truth tables are shown for up to 8. Rewrites stop at 200 nodes, because the CNF of some formulas grows exponentially. Hitting a limit gives a clear error, never a hang.
+**Errors as data.** Formula and proof diagnostics include codes, messages, and source positions. Proof lines are checked independently wherever possible, allowing multiple errors to be reported without unnecessarily cascading failures.
 
-**Rewriting never simplifies.** Each step applies one named law at one place, in a fixed order. A student can check every step by hand. The cost is that results are not minimal, which the tool does not hide.
+**Explicit computational limits.** Formulas are limited to 1,000 characters and 100 levels of nesting. Computation supports up to sixteen variables, while full truth tables are displayed only for formulas with at most eight. Additional work and rewrite limits prevent pathological inputs from consuming excessive resources.
 
-**The proof checker verifies and never searches.** Scope follows the textbook: a line can cite earlier lines in its own subproof or an enclosing one, and a closed subproof only as a whole range such as `ImpI 3-5`.
+**Transparent rewriting.** Transformations apply one named law at a time. The engine intentionally does not simplify expressions, so students can inspect each logical transformation. Consequently, the resulting normal forms are not guaranteed to be minimal.
 
-**Anonymous by design.** A visitor is a random id in a signed cookie. Only exercise attempts are stored, never the formulas typed into the other tools. A "Forget my history" button deletes everything. POSTs carry a CSRF token. Read-only tools use GET so results are shareable links.
+**Verification rather than proof discovery.** The proof checker verifies submitted derivations; it does not search for proofs. It supports nested subproofs and explicit range citations. The project does not claim proof-system completeness.
 
-## Testing
+**Privacy.** Visitors receive an anonymous identifier stored in a signed session cookie. Only exercise attempts are persisted; formulas submitted to the other tools are not stored. CSRF protection is applied to state-changing requests, and visitors can delete their exercise history.
 
-`pytest` runs the whole suite. Soundness of the proof checker is tested by brute force: every accepted rule application over a pool of formulas is checked against the truth-table validator, and every rule must have at least one accepted case. I claim soundness only for what is tested, and I do not claim the checker finds proofs.
+## Testing and limitations
 
-## Running it
+The project includes 876 pytest tests. Proof-rule soundness is tested empirically by comparing accepted rule applications against truth-table semantics over a generated formula pool. This is a testing strategy, not a formal mathematical proof of soundness or completeness.
 
-    pip install -r requirements.txt
-    flask --app app run
-    pytest
+The application has several deliberate limitations: it does not search for proofs, rewriting is not minimal, and the exercise reference solutions can be revealed. These are documented design boundaries rather than hidden capabilities.
+
+## Running the application
+
+Install the dependencies:
+
+    python -m pip install -r requirements.txt
+
+Start the Flask development server:
+
+    python -m flask --app app run
+
+Run the tests:
+
+    python -m pytest -q
 
 ## AI assistance
 
-I built this project together with Claude (Anthropic) and reviewed designs with ChatGPT (OpenAI). Files carry a comment saying so.
+I used Claude (Anthropic) for architecture discussions, implementation, and debugging, and ChatGPT (OpenAI) for design reviews, code reviews, and interface refinements. I reviewed and tested the resulting implementation and take responsibility for the submitted work.
+
+The relevant source files include AI-assistance comments as required by CS50x. The agents were also asked to document their own involvement. Accountability goes both ways (Not really...!).

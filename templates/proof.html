@@ -19,7 +19,10 @@
                   placeholder="P → Q ; premise&#10;P ; premise&#10;Q ; ImpE 1,2"
                   autocomplete="off" spellcheck="false">{{ proof_text }}</textarea>
 
-        <div><button type="submit">Check proof</button></div>
+       <div class="form-actions">
+            <button type="submit">Check proof</button>
+            <a class="button-link" href="{{ url_for('proof_checker') }}">Clear</a>
+        </div>
     </form>
     {% include "_symbols.html" %}
     <p class="hint">
@@ -48,6 +51,7 @@
 {% else %}
 <section aria-labelledby="result-heading">
     <h2 id="result-heading">Result</h2>
+    {% include "_share_link.html" %}
 
     {% if result.premises %}
     <p class="meta">Premises:</p>

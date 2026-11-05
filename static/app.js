@@ -3,6 +3,37 @@
 // can be typed instead. Pages with several inputs (equivalence, argument) insert
 // into whichever formula box was focused last.
 document.addEventListener("DOMContentLoaded", () => {
+        // Copy the current shareable result URL.
+    document.querySelectorAll("[data-copy-link]").forEach((button) => {
+        const status = button.parentElement.querySelector(".copy-status");
+
+        button.addEventListener("click", async () => {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(window.location.href);
+                } else {
+                    const temporary = document.createElement("textarea");
+                    temporary.value = window.location.href;
+                    temporary.style.position = "fixed";
+                    temporary.style.opacity = "0";
+                    document.body.appendChild(temporary);
+                    temporary.select();
+
+                    const copied = document.execCommand("copy");
+                    temporary.remove();
+
+                    if (!copied) {
+                        throw new Error("Clipboard access unavailable");
+                    }
+                }
+
+                button.textContent = "Copied!";
+                status.textContent = "Result link copied to clipboard.";
+            } catch {
+                status.textContent = "Unable to copy. You can copy the URL from your address bar.";
+            }
+        });
+    });
     const palette = document.getElementById("symbols");
     const inputs = Array.from(document.querySelectorAll(".formula-input"));
     if (!palette || inputs.length === 0) {

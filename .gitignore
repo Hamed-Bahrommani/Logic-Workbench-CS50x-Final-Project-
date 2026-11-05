@@ -13,8 +13,14 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Local database (add the exact filename once M3 creates it)
+# Local databases and SQLite sidecar files
 *.db
+*.db-*
 *.sqlite
-workbench.db
+*.sqlite-*
+
+# Local secrets and environment files
 secret_key.txt
+.env
+.env.*
+!.env.example

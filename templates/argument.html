@@ -15,7 +15,10 @@
         <input type="text" id="conclusion" name="conclusion" class="formula-input"
                value="{{ conclusion }}" placeholder="Q" autocomplete="off" spellcheck="false">
 
-        <div><button type="submit">Check</button></div>
+        <div class="form-actions">
+            <button type="submit">Check</button>
+            <a class="button-link" href="{{ url_for('argument') }}">Clear</a>
+        </div>
     </form>
     {% include "_symbols.html" %}
 </section>
@@ -40,6 +43,7 @@
 {% else %}
 <section aria-labelledby="result-heading">
     <h2 id="result-heading">Result</h2>
+    {% include "_share_link.html" %}
 
     {% if result.premises %}
     <p class="meta">Premises:</p>
@@ -71,7 +75,8 @@
         {% if result.premises %}This is the first assignment (in truth-table order) that makes every premise true and the conclusion false.
         {% else %}This is the first assignment that makes the conclusion false.{% endif %}
     </p>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region"
+        aria-label="Countermodel truth table">
         <table class="truth-table">
             <caption class="visually-hidden">A countermodel to the argument</caption>
             <thead>

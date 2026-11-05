@@ -15,7 +15,10 @@
         <input type="text" id="right" name="right" class="formula-input" value="{{ right }}"
                placeholder="¬P ∨ Q" autocomplete="off" spellcheck="false">
 
-        <div><button type="submit">Compare</button></div>
+        <div class="form-actions">
+            <button type="submit">Compare</button>
+            <a class="button-link" href="{{ url_for('equivalence') }}">Clear</a>
+        </div>
     </form>
     {% include "_symbols.html" %}
 </section>
@@ -40,6 +43,7 @@
 {% else %}
 <section aria-labelledby="result-heading">
     <h2 id="result-heading">Result</h2>
+    {% include "_share_link.html" %}
     <p class="canonical">First: <code>{{ result.left.display }}</code></p>
     <p class="canonical">Second: <code>{{ result.right.display }}</code></p>
 
@@ -53,7 +57,8 @@
         <span class="badge bad">Not equivalent</span>
         This is the first assignment (in truth-table order) where they differ.
     </p>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region"
+        aria-label="Counterexample truth table">
         <table class="truth-table">
             <caption class="visually-hidden">An assignment that distinguishes the two formulas</caption>
             <thead>

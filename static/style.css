@@ -304,3 +304,1041 @@ h3 { font-size: 1rem; margin: 1.2rem 0 0.3rem; }
     overflow-x: auto;
 }
 .forget-form { margin-top: 0.5rem; }
+
+
+/* --- motion and transitions --- */
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes item-enter {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger the main page regions. */
+.site-header {
+    animation: page-enter 350ms ease-out both;
+}
+
+.site-nav {
+    animation: page-enter 350ms ease-out 60ms both;
+}
+
+main {
+    animation: page-enter 400ms ease-out 120ms both;
+}
+
+/* Smooth interactive feedback. */
+button,
+.site-nav a,
+.examples a,
+.exercise-list a {
+    transition:
+        background-color 160ms ease,
+        color 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease,
+        box-shadow 160ms ease;
+}
+
+button:hover:not(:disabled),
+.site-nav a:hover {
+    transform: translateY(-2px);
+}
+
+button:active:not(:disabled),
+.site-nav a:active {
+    transform: translateY(0);
+}
+
+/* Result rows enter gently. */
+.proof-line,
+.step {
+    animation: item-enter 280ms ease-out both;
+}
+
+/* Respect the user's operating-system motion preference. */
+@media (prefers-reduced-motion: reduce) {
+    .site-header,
+    .site-nav,
+    main,
+    .proof-line,
+    .step {
+        animation: none !important;
+    }
+
+    button,
+    .site-nav a,
+    .examples a,
+    .exercise-list a {
+        transition: none !important;
+    }
+}
+
+
+/* ==========================================
+   UI REFINEMENT — BATCH 1
+   Global layout, responsive design and motion
+   ========================================== */
+
+/* --- Responsive page widths --- */
+
+/* Give the application more room without making every
+   individual tool unnecessarily wide. */
+.site-header,
+.site-nav,
+main {
+    max-width: 60rem;
+}
+
+/* Keep the header and navigation aligned with the
+   wider content on information-heavy pages. */
+body:has(.truth-table) .site-header,
+body:has(.truth-table) .site-nav,
+body:has(.truth-table) main {
+    max-width: 68rem;
+}
+
+body:has(.proof-lines) .site-header,
+body:has(.proof-lines) .site-nav,
+body:has(.proof-lines) main {
+    max-width: 64rem;
+}
+
+body:has(.steps) .site-header,
+body:has(.steps) .site-nav,
+body:has(.steps) main {
+    max-width: 62rem;
+}
+
+/* --- Page entrance animation --- */
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.site-header {
+    animation: page-enter 380ms ease-out both;
+}
+
+.site-nav {
+    animation: page-enter 380ms ease-out 60ms both;
+}
+
+main {
+    animation: page-enter 420ms ease-out 120ms both;
+}
+
+/* --- Interactive feedback --- */
+
+button,
+.site-nav a,
+.examples a,
+.exercise-list a {
+    transition:
+        background-color 160ms ease,
+        color 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease,
+        box-shadow 160ms ease;
+}
+
+button:hover:not(:disabled),
+.site-nav a:hover {
+    transform: translateY(-2px);
+}
+
+button:active:not(:disabled),
+.site-nav a:active {
+    transform: translateY(0);
+}
+
+button:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+}
+
+input[type="text"],
+textarea.formula-input,
+select {
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+/* --- Sequential result appearance --- */
+
+@keyframes item-enter {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.proof-line,
+.step,
+.examples li,
+.exercise-list li {
+    animation: item-enter 300ms ease-out both;
+}
+
+/* Stagger the first eight items. Later items share
+   the final delay, so large results never wait long. */
+
+.proof-line:nth-child(1),
+.step:nth-child(1),
+.examples li:nth-child(1),
+.exercise-list li:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.proof-line:nth-child(2),
+.step:nth-child(2),
+.examples li:nth-child(2),
+.exercise-list li:nth-child(2) {
+    animation-delay: 45ms;
+}
+
+.proof-line:nth-child(3),
+.step:nth-child(3),
+.examples li:nth-child(3),
+.exercise-list li:nth-child(3) {
+    animation-delay: 90ms;
+}
+
+.proof-line:nth-child(4),
+.step:nth-child(4),
+.examples li:nth-child(4),
+.exercise-list li:nth-child(4) {
+    animation-delay: 135ms;
+}
+
+.proof-line:nth-child(5),
+.step:nth-child(5),
+.examples li:nth-child(5),
+.exercise-list li:nth-child(5) {
+    animation-delay: 180ms;
+}
+
+.proof-line:nth-child(6),
+.step:nth-child(6),
+.examples li:nth-child(6),
+.exercise-list li:nth-child(6) {
+    animation-delay: 225ms;
+}
+
+.proof-line:nth-child(7),
+.step:nth-child(7),
+.examples li:nth-child(7),
+.exercise-list li:nth-child(7) {
+    animation-delay: 270ms;
+}
+
+.proof-line:nth-child(n+8),
+.step:nth-child(n+8),
+.examples li:nth-child(n+8),
+.exercise-list li:nth-child(n+8) {
+    animation-delay: 315ms;
+}
+
+/* --- Small-screen refinements --- */
+
+@media (max-width: 640px) {
+    .site-header {
+        padding-top: 1rem;
+    }
+
+    .site-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .site-nav {
+        gap: 0.35rem;
+    }
+
+    .site-nav a {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.9rem;
+    }
+
+    .formula-form {
+        flex-wrap: wrap;
+    }
+
+    .formula-form input[type="text"] {
+        flex: 1 1 100%;
+    }
+
+    .formula-form button {
+        align-self: flex-start;
+    }
+
+    .truth-table {
+        font-size: 0.95rem;
+    }
+
+    .truth-table th,
+    .truth-table td {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .proof-lines {
+        padding-left: 1.4rem;
+    }
+
+    .proof-line {
+        padding: 0.4rem 0.5rem;
+    }
+
+    .line-main {
+        overflow-wrap: anywhere;
+    }
+
+    .rule-table {
+        width: 100%;
+    }
+}
+
+/* --- Accessibility: reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+    .site-header,
+    .site-nav,
+    main,
+    .proof-line,
+    .step,
+    .examples li,
+    .exercise-list li {
+        animation: none !important;
+    }
+
+    button,
+    .site-nav a,
+    .examples a,
+    .exercise-list a,
+    input[type="text"],
+    textarea.formula-input,
+    select {
+        transition: none !important;
+    }
+
+    button:hover:not(:disabled),
+    .site-nav a:hover {
+        transform: none;
+    }
+}
+
+
+/* ==========================================
+   UI REFINEMENT — BATCH 2
+   Fitch-style proof presentation
+   ========================================== */
+
+.proof-lines {
+    margin: 1.2rem 0;
+    padding-left: 3rem;
+    list-style-position: outside;
+}
+
+/* Proof lines form one continuous workspace,
+   rather than a collection of separate cards. */
+
+.proof-line {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    border-radius: 0 7px 7px 0;
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease;
+}
+
+.proof-line + .proof-line {
+    border-top: 1px solid var(--border);
+}
+
+.proof-line::marker {
+    color: var(--muted);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Correct and incorrect inference indicators. */
+
+.proof-line.ok {
+    border-left-color: transparent;
+}
+
+.proof-line.bad {
+    border-left-color: var(--no-text);
+    background: var(--error-bg);
+}
+
+.proof-line.ok:hover {
+    background: var(--surface);
+}
+
+.proof-line.bad:hover {
+    filter: brightness(1.04);
+}
+
+/* Align formula, scope markers and inference rule. */
+
+.proof-line .line-main {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.55rem;
+    min-width: 0;
+    margin: 0;
+}
+
+.proof-line .bars {
+    flex: 0 0 auto;
+    color: var(--accent);
+    font-size: 1.05rem;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+}
+
+/* Keep the status indicator aligned across lines. */
+
+.proof-line .mark {
+    flex: 0 0 1.1rem;
+    width: 1.1rem;
+    margin: 0;
+    text-align: center;
+}
+
+/* Formula is the primary content of each line. */
+
+.proof-line .line-main > code {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 1.05rem;
+    background: var(--surface);
+}
+
+/* Rule and references are secondary metadata. */
+
+.proof-line .rule {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Error details remain distinct from the proof itself. */
+
+.proof-line .error-context {
+    margin: 0.65rem 0 0.4rem;
+    font-size: 0.95rem;
+}
+
+.proof-line .line-error {
+    margin: 0.3rem 0 0;
+    font-size: 0.9rem;
+}
+
+/* Small screens. */
+
+@media (max-width: 640px) {
+    .proof-lines {
+        padding-left: 2.3rem;
+    }
+
+    .proof-line {
+        padding: 0.45rem 0.4rem;
+    }
+
+    .proof-line .line-main {
+        gap: 0.25rem 0.4rem;
+    }
+
+    .proof-line .rule {
+        margin-left: 1.5rem;
+    }
+}
+
+
+/* --- Clear/reset controls --- */
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.button-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color 160ms ease,
+        color 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease;
+}
+
+.button-link:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+}
+
+.button-link:active {
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button-link {
+        transition: none;
+    }
+
+    .button-link:hover,
+    .button-link:active {
+        transform: none;
+    }
+}
+
+
+/* ==========================================
+   UI REFINEMENT — BATCH 3
+   Normal-form derivation presentation
+   ========================================== */
+
+/* --- Derivation timeline --- */
+
+.steps {
+    margin: 1.2rem 0 1.5rem;
+    padding-left: 2.2rem;
+}
+
+.step {
+    position: relative;
+    margin: 0 0 0.9rem;
+    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.step::marker {
+    color: var(--accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.step:hover {
+    border-color: var(--accent);
+    box-shadow: 0 3px 12px rgb(0 0 0 / 7%);
+}
+
+/* --- Applied law --- */
+
+.step .step-law {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.55rem;
+    margin: 0 0 0.65rem;
+}
+
+.step .step-law strong {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.step .step-law code {
+    margin-left: 0;
+    font-size: 0.85rem;
+    background: var(--bg);
+}
+
+/* --- Local transformation --- */
+
+.step > p:not(.step-law):not(.meta) {
+    margin: 0.4rem 0;
+    color: var(--muted);
+    line-height: 2;
+}
+
+.step > p:not(.step-law):not(.meta) code {
+    display: inline-block;
+    max-width: 100%;
+    margin: 0.15rem 0.1rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--bg);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    vertical-align: middle;
+}
+
+/* --- Whole-formula snapshot --- */
+
+.step > p.meta {
+    margin: 0.75rem 0 0;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    line-height: 1.7;
+}
+
+.step > p.meta code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 0.9rem;
+}
+
+/* --- Final result --- */
+
+.steps + .canonical {
+    margin: 1.2rem 0;
+    padding: 0.85rem 1rem;
+    background: var(--yes-bg);
+    border-left: 4px solid var(--yes-text);
+    border-radius: 0 8px 8px 0;
+    line-height: 1.8;
+}
+
+.steps + .canonical code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* --- Small screens --- */
+
+@media (max-width: 640px) {
+    .steps {
+        padding-left: 1.7rem;
+    }
+
+    .step {
+        padding: 0.7rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .step > p:not(.step-law):not(.meta) code {
+        font-size: 0.9rem;
+    }
+}
+
+/* --- Accessibility --- */
+
+@media (prefers-reduced-motion: reduce) {
+    .step {
+        transition: none;
+    }
+}
+
+
+/* ==========================================
+   UI REFINEMENT — BATCH 4
+   Exercise experience and progress
+   ========================================== */
+
+/* --- Overall progress --- */
+
+.exercise-progress-wrap {
+    margin: 0.8rem 0 1.4rem;
+}
+
+.exercise-progress-wrap .meta {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+}
+
+.exercise-progress {
+    display: block;
+    width: 100%;
+    height: 0.65rem;
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--border);
+}
+
+.exercise-progress::-webkit-progress-bar {
+    background: var(--border);
+    border-radius: 999px;
+}
+
+.exercise-progress::-webkit-progress-value {
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 500ms ease;
+}
+
+.exercise-progress::-moz-progress-bar {
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 500ms ease;
+}
+
+/* --- Exercise categories --- */
+
+#exercises-heading ~ h3 {
+    margin-top: 1.7rem;
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.05rem;
+}
+
+/* --- Exercise list --- */
+
+.exercise-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.exercise-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0.65rem 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition:
+        border-color 160ms ease,
+        background-color 160ms ease,
+        transform 160ms ease;
+}
+
+.exercise-list li:hover {
+    border-color: var(--accent);
+    transform: translateX(2px);
+}
+
+.exercise-list .mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 1.4rem;
+    width: 1.4rem;
+    font-size: 1rem;
+}
+
+.exercise-list .mark.ok {
+    color: var(--yes-text);
+}
+
+.exercise-list li a {
+    flex: 1;
+    min-width: 0;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.exercise-list li a:hover {
+    color: var(--accent);
+}
+
+/* --- Exercise detail page --- */
+
+#exercise-heading + .meta {
+    display: inline-block;
+    margin: 0.2rem 0 0.8rem;
+    padding: 0.2rem 0.65rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+section[aria-labelledby="exercise-heading"] > .canonical {
+    margin: 0.7rem 0;
+    padding: 0.7rem 0.85rem;
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 7px 7px 0;
+}
+
+section[aria-labelledby="exercise-heading"] > .canonical code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* --- Hint and solution disclosures --- */
+
+.rule-reference {
+    padding: 0.8rem 0.9rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.rule-reference summary {
+    color: var(--text);
+    transition: color 160ms ease;
+}
+
+.rule-reference summary:hover {
+    color: var(--accent);
+}
+
+.rule-reference[open] summary {
+    margin-bottom: 0.65rem;
+    color: var(--accent);
+}
+
+.rule-reference p {
+    margin-bottom: 0.3rem;
+}
+
+/* --- Attempt history --- */
+
+.attempts {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.attempts li {
+    padding: 0.4rem 0.6rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.attempts a {
+    color: var(--accent);
+}
+
+/* --- Next exercise navigation --- */
+
+.proof-lines + p a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    padding: 0.65rem 0.95rem;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: 1px solid var(--accent);
+    border-radius: 7px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.proof-lines + p a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+}
+
+/* --- Small screens --- */
+
+@media (max-width: 640px) {
+    .exercise-list li {
+        padding: 0.65rem;
+    }
+
+    .exercise-progress {
+        height: 0.55rem;
+    }
+
+    .rule-reference {
+        padding: 0.7rem;
+    }
+
+    .attempts {
+        padding-left: 1rem;
+    }
+}
+
+/* --- Reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+    .exercise-progress::-webkit-progress-value,
+    .exercise-progress::-moz-progress-bar {
+        transition: none;
+    }
+
+    .exercise-list li,
+    .rule-reference summary,
+    .proof-lines + p a {
+        transition: none;
+    }
+
+    .exercise-list li:hover,
+    .proof-lines + p a:hover {
+        transform: none;
+    }
+}
+
+
+/* ==========================================
+   UI REFINEMENT — BATCH 5A
+   Tables, accessibility and usability
+   ========================================== */
+
+/* --- Table surface and scrolling --- */
+
+:root {
+    --table-row-alt: #f4f6f9;
+    --table-row-hover: #edf1f8;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --table-row-alt: #252a34;
+        --table-row-hover: #2b3240;
+    }
+}
+
+.table-wrap {
+    width: fit-content;
+    max-width: 100%;
+    max-height: min(70vh, 42rem);
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overscroll-behavior: contain;
+}
+
+.truth-table {
+    width: max-content;
+    min-width: 100%;
+}
+
+/* Headers remain visible while scrolling vertically. */
+.truth-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--surface);
+    box-shadow: 0 1px 0 var(--border);
+}
+
+/* Subtle alternating row backgrounds. */
+.truth-table tbody tr:nth-child(even) td:not(.yes):not(.no) {
+    background: var(--table-row-alt);
+}
+
+/* Hover feedback without overriding truth-value colors. */
+.truth-table tbody tr:hover td:not(.yes):not(.no) {
+    background: var(--table-row-hover);
+}
+
+/* Keyboard users can focus and scroll the table region. */
+.table-wrap:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* --- Link readability --- */
+
+a {
+    text-underline-offset: 0.15em;
+}
+
+/* --- High-contrast mode --- */
+
+@media (forced-colors: active) {
+    .table-wrap,
+    .truth-table th,
+    .truth-table td {
+        border-color: CanvasText;
+    }
+
+    .proof-line.ok,
+    .proof-line.bad {
+        border-left-color: CanvasText;
+    }
+
+    .exercise-progress {
+        border: 1px solid CanvasText;
+    }
+
+    .badge {
+        border: 1px solid CanvasText;
+    }
+}
+
+/* --- Reduced motion: include table interactions --- */
+
+@media (prefers-reduced-motion: reduce) {
+    .truth-table tbody tr,
+    .table-wrap {
+        scroll-behavior: auto;
+        transition: none;
+    }
+}
+
+
+/* --- Shareable result links --- */
+
+.share-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0.6rem 0 1rem;
+}
+
+.copy-link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.copy-status {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .copy-link {
+        transition: none;
+    }
+}

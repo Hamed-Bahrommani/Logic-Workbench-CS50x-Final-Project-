@@ -17,7 +17,10 @@
             {% endfor %}
         </select>
 
-        <div><button type="submit">Rewrite</button></div>
+        <div class="form-actions">
+            <button type="submit">Rewrite</button>
+            <a class="button-link" href="{{ url_for('normal_form') }}">Clear</a>
+        </div>
     </form>
     {% include "_symbols.html" %}
 </section>
@@ -42,6 +45,7 @@
 {% else %}
 <section aria-labelledby="result-heading">
     <h2 id="result-heading">Result</h2>
+    {% include "_share_link.html" %}
     <p class="canonical">Start: <code>{{ result.start.display }}</code></p>
 
     {% if result.already %}

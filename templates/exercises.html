@@ -5,7 +5,16 @@
 {% block main %}
 <section aria-labelledby="exercises-heading">
     <h2 id="exercises-heading">Exercises</h2>
-    <p class="meta">{{ solved_count }} of {{ total }} solved</p>
+    <div class="exercise-progress-wrap">
+        <p class="meta">{{ solved_count }} of {{ total }} solved</p>
+        <progress
+            class="exercise-progress"
+            value="{{ solved_count }}"
+            max="{{ total }}"
+            aria-label="Exercise completion">
+            {{ solved_count }} of {{ total }} solved
+        </progress>
+    </div>
 
     {% for level_name, items in groups %}
     <h3>{{ level_name }}</h3>

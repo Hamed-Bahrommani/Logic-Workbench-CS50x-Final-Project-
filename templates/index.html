@@ -10,6 +10,7 @@
                placeholder="P → (Q ∧ ¬R)" autocomplete="off" spellcheck="false"
                autofocus>
         <button type="submit">Compute</button>
+        <a class="button-link" href="{{ url_for('index') }}">Clear</a>
     </form>
     {% include "_symbols.html" %}
 </section>
@@ -30,6 +31,7 @@
 {% else %}
 <section aria-labelledby="result-heading">
     <h2 id="result-heading">Result</h2>
+    {% include "_share_link.html" %}
     <p class="canonical">Read as: <code>{{ result.display }}</code></p>
     <p class="verdict">
         <span class="badge {{ result.classification }}">{{ result.classification }}</span>
@@ -49,7 +51,8 @@
         from every row.
     </p>
     {% else %}
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region"
+        aria-label="Scrollable truth table">
         <table class="truth-table">
             <caption class="visually-hidden">Truth table for {{ result.display }}</caption>
             <thead>
