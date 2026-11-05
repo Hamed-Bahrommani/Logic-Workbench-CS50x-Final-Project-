@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}Exercises · Logic Workbench{% endblock %}
+
+{% block main %}
+<section aria-labelledby="exercises-heading">
+    <h2 id="exercises-heading">Exercises</h2>
+    <p class="meta">{{ solved_count }} of {{ total }} solved</p>
+
+    {% for level_name, items in groups %}
+    <h3>{{ level_name }}</h3>
+    <ul class="exercise-list">
+        {% for exercise in items %}
+        <li>
+            {% if exercise.id in solved %}
+            <span class="mark ok" aria-hidden="true">✓</span><span class="visually-hidden">Solved: </span>
+            {% else %}
+            <span class="mark" aria-hidden="true">○</span>
+            {% endif %}
+            <a href="{{ url_for('exercise_page', exercise_id=exercise.id) }}">{{ exercise.title }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</section>
+
+{% if has_history %}
+<section aria-labelledby="privacy-heading">
+    <h2 id="privacy-heading">Your progress</h2>
+    <p class="hint">
+        Your attempts are stored under a random id in a cookie in this browser. Nothing else
+        about you is kept.
+    </p>
+    <form method="post" action="{{ url_for('forget_history') }}" class="forget-form">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button type="submit">Forget my history</button>
+    </form>
+</section>
+{% endif %}
+{% endblock %}

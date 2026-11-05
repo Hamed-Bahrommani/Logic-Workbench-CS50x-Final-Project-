@@ -16,3 +16,5 @@ Thumbs.db
 # Local database (add the exact filename once M3 creates it)
 *.db
 *.sqlite
+workbench.db
+secret_key.txt

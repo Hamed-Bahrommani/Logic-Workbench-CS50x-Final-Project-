@@ -5,13 +5,50 @@ answer comes from logic.api, which never raises and always returns a dict.
 """
 
 
-from flask import Flask, render_template, request
+import hmac
+import os
+import secrets
+from datetime import timedelta
 
+from flask import Flask, abort, redirect, render_template, request, session, url_for
+
+import storage
+from exercises import LEVELS, load_exercises
 from logic import api
 
 from logic.proof import ALL_RULES
 
 app = Flask(__name__)
+
+def _load_secret_key(path):
+    """The key that signs the session cookie: kept in a file so sessions survive restarts."""
+    try:
+        with open(path, encoding="utf-8") as handle:
+            key = handle.read().strip()
+        if key:
+            return key
+    except OSError:
+        pass
+    key = secrets.token_hex(32)
+    try:
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(key)
+    except OSError:
+        pass          # a read-only disk: sessions then last only until the server restarts
+    return key
+
+
+app.secret_key = os.environ.get("SECRET_KEY") or _load_secret_key(
+    os.path.join(app.root_path, "secret_key.txt")
+)
+app.config.update(
+    DATABASE=os.environ.get("WORKBENCH_DB") or os.path.join(app.root_path, "workbench.db"),
+    SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=timedelta(days=180),
+)
+
+EXERCISES = load_exercises()
+EXERCISE_BY_ID = {exercise["id"]: exercise for exercise in EXERCISES}
 
 # The engine caps variables and nesting; these cap the raw size of what a
 # visitor can send, before any parsing happens.
@@ -283,6 +320,147 @@ def proof_checker():
         examples=PROOF_EXAMPLES,
         rules=ALL_RULES,
     )
+
+# --- exercises and anonymous history ---------------------------------------------
+
+def _db_path():
+    path = app.config["DATABASE"]
+    storage.init_db(path)
+    return path
+
+
+def _visitor_id(create=False):
+    """The anonymous id in this browser's session cookie (made on demand)."""
+    visitor = session.get("sid")
+    if visitor is None and create:
+        visitor = secrets.token_hex(16)
+        session["sid"] = visitor
+        session.permanent = True
+    return visitor
+
+
+def _csrf_token():
+    token = session.get("csrf")
+    if token is None:
+        token = secrets.token_hex(16)
+        session["csrf"] = token
+        session.permanent = True
+    return token
+
+
+def _csrf_ok():
+    sent = request.form.get("csrf", "")
+    expected = session.get("csrf", "")
+    return bool(sent) and bool(expected) and hmac.compare_digest(sent.encode(), expected.encode())
+
+
+app.jinja_env.globals["csrf_token"] = _csrf_token
+
+
+def _exercise_or_404(exercise_id):
+    exercise = EXERCISE_BY_ID.get(exercise_id)
+    if exercise is None:
+        abort(404)
+    return exercise
+
+
+def _next_exercise(exercise):
+    position = EXERCISES.index(exercise) + 1
+    return EXERCISES[position] if position < len(EXERCISES) else None
+
+
+def _attempt_status(result):
+    if result["complete"]:
+        return "complete"
+    return "unfinished" if result["valid"] else "errors"
+
+
+def _render_exercise(exercise, proof_text, result, history):
+    return render_template(
+        "exercise.html",
+        exercise=exercise,
+        levels=LEVELS,
+        proof_text=proof_text,
+        result=result,
+        history=history,
+        next_exercise=_next_exercise(exercise),
+        error_context=None,
+        error_label=None,
+    )
+
+
+@app.get("/exercises")
+def exercise_list():
+    visitor = _visitor_id()
+    solved = storage.solved_exercises(_db_path(), visitor) if visitor else set()
+    groups = [
+        (name, [exercise for exercise in EXERCISES if exercise["level"] == level])
+        for level, name in LEVELS.items()
+    ]
+    return render_template(
+        "exercises.html",
+        groups=groups,
+        solved=solved,
+        solved_count=len(solved & set(EXERCISE_BY_ID)),
+        total=len(EXERCISES),
+        has_history=visitor is not None,
+    )
+
+
+@app.get("/exercises/<exercise_id>")
+def exercise_page(exercise_id):
+    exercise = _exercise_or_404(exercise_id)
+    visitor = _visitor_id()
+    history = storage.attempts_for(_db_path(), visitor, exercise["id"]) if visitor else []
+
+    proof_text, result = "", None
+    attempt_id = request.args.get("attempt", type=int)
+    if attempt_id is not None:
+        attempt = (
+            storage.get_attempt(_db_path(), visitor, exercise["id"], attempt_id) if visitor else None
+        )
+        if attempt is None:
+            abort(404)
+        proof_text = attempt["proof_text"]
+        result = api.check_proof(exercise["premises"], exercise["conclusion"], proof_text)
+    elif history:
+        proof_text = history[0]["proof_text"]       # pick up where the visitor left off
+    return _render_exercise(exercise, proof_text, result, history)
+
+
+@app.post("/exercises/<exercise_id>")
+def submit_exercise(exercise_id):
+    exercise = _exercise_or_404(exercise_id)
+    if not _csrf_ok():
+        abort(400)
+
+    proof_text = request.form.get("proof", "")
+    result = _length_error(proof_text, "proof", limit=MAX_PROOF_TEXT) or api.check_proof(
+        exercise["premises"], exercise["conclusion"], proof_text
+    )
+    if not result["ok"]:
+        # Nothing worth keeping (empty or oversized): show the problem, record nothing.
+        visitor = _visitor_id()
+        history = storage.attempts_for(_db_path(), visitor, exercise["id"]) if visitor else []
+        return _render_exercise(exercise, proof_text, result, history)
+
+    attempt_id = storage.record_attempt(
+        _db_path(), _visitor_id(create=True), exercise["id"], proof_text,
+        _attempt_status(result), result["error_count"],
+    )
+    # Post/Redirect/Get: refreshing the next page never submits the proof again.
+    return redirect(url_for("exercise_page", exercise_id=exercise["id"], attempt=attempt_id), code=303)
+
+
+@app.post("/forget")
+def forget_history():
+    if not _csrf_ok():
+        abort(400)
+    visitor = session.get("sid")
+    if visitor:
+        storage.delete_session(_db_path(), visitor)
+    session.pop("sid", None)
+    return redirect(url_for("exercise_list"), code=303)
 
 
 def _check_proof_request(premises_text, premises, conclusion, proof_text) -> dict:

@@ -1,0 +1,206 @@
+[
+  {
+    "id": "modus-ponens",
+    "title": "Modus ponens",
+    "level": 1,
+    "premises": ["P → Q", "P"],
+    "conclusion": "Q",
+    "hint": "Cite the implication and its antecedent with ImpE.",
+    "solution": ["P → Q ; premise", "P ; premise", "Q ; ImpE 1,2"]
+  },
+  {
+    "id": "and-commutes",
+    "title": "A conjunction can be turned around",
+    "level": 1,
+    "premises": ["P ∧ Q"],
+    "conclusion": "Q ∧ P",
+    "hint": "Take the conjunction apart with AndE, then put it back together the other way round with AndI.",
+    "solution": ["P ∧ Q ; premise", "P ; AndE 1", "Q ; AndE 1", "Q ∧ P ; AndI 3,2"]
+  },
+  {
+    "id": "or-introduction",
+    "title": "Adding a disjunct",
+    "level": 1,
+    "premises": ["P"],
+    "conclusion": "Q ∨ P",
+    "hint": "OrI needs only one side of the disjunction; the other side can be any formula.",
+    "solution": ["P ; premise", "Q ∨ P ; OrI 1"]
+  },
+  {
+    "id": "chain-of-implications",
+    "title": "Following two implications",
+    "level": 1,
+    "premises": ["P → Q", "Q → R", "P"],
+    "conclusion": "R",
+    "hint": "Use ImpE twice: first on P → Q, then on Q → R.",
+    "solution": ["P → Q ; premise", "Q → R ; premise", "P ; premise", "Q ; ImpE 1,3", "R ; ImpE 2,4"]
+  },
+  {
+    "id": "from-a-contradiction",
+    "title": "Anything follows from a contradiction",
+    "level": 1,
+    "premises": ["P", "¬P"],
+    "conclusion": "Q",
+    "hint": "NotE turns P and ¬P into ⊥, and BotE turns ⊥ into anything.",
+    "solution": ["P ; premise", "¬P ; premise", "⊥ ; NotE 1,2", "Q ; BotE 3"]
+  },
+  {
+    "id": "self-implication",
+    "title": "P implies P",
+    "level": 2,
+    "premises": [],
+    "conclusion": "P → P",
+    "hint": "Open a subproof that assumes P, and close it straight away with ImpI 1-1.",
+    "solution": ["| P ; assume", "P → P ; ImpI 1-1"]
+  },
+  {
+    "id": "implication-chain",
+    "title": "Chaining implications",
+    "level": 2,
+    "premises": ["P → Q", "Q → R"],
+    "conclusion": "P → R",
+    "hint": "Assume P inside a subproof, get R with two uses of ImpE, then close the subproof with ImpI.",
+    "solution": [
+      "P → Q ; premise",
+      "Q → R ; premise",
+      "| P ; assume",
+      "| Q ; ImpE 1,3",
+      "| R ; ImpE 2,4",
+      "P → R ; ImpI 3-5"
+    ]
+  },
+  {
+    "id": "double-negation-introduction",
+    "title": "Introducing a double negation",
+    "level": 2,
+    "premises": ["P"],
+    "conclusion": "¬¬P",
+    "hint": "To prove ¬¬P, assume ¬P and reach ⊥. NotI then gives ¬¬P.",
+    "solution": ["P ; premise", "| ¬P ; assume", "| ⊥ ; NotE 1,2", "¬¬P ; NotI 2-3"]
+  },
+  {
+    "id": "modus-tollens",
+    "title": "Modus tollens",
+    "level": 2,
+    "premises": ["P → Q", "¬Q"],
+    "conclusion": "¬P",
+    "hint": "Assume P, derive Q, and clash it with ¬Q to get ⊥. NotI closes the subproof.",
+    "solution": [
+      "P → Q ; premise",
+      "¬Q ; premise",
+      "| P ; assume",
+      "| Q ; ImpE 1,3",
+      "| ⊥ ; NotE 4,2",
+      "¬P ; NotI 3-5"
+    ]
+  },
+  {
+    "id": "disjunction-commutes",
+    "title": "A disjunction can be turned around",
+    "level": 2,
+    "premises": ["P ∨ Q"],
+    "conclusion": "Q ∨ P",
+    "hint": "Use OrE: one subproof for each side of P ∨ Q, each ending in Q ∨ P.",
+    "solution": [
+      "P ∨ Q ; premise",
+      "| P ; assume",
+      "| Q ∨ P ; OrI 2",
+      "| Q ; assume",
+      "| Q ∨ P ; OrI 4",
+      "Q ∨ P ; OrE 1,2-3,4-5"
+    ]
+  },
+  {
+    "id": "contraposition",
+    "title": "Contraposition",
+    "level": 3,
+    "premises": ["P → Q"],
+    "conclusion": "¬Q → ¬P",
+    "hint": "Assume ¬Q, and inside that assume P. Derive ⊥, close with NotI, then close the outer subproof with ImpI.",
+    "solution": [
+      "P → Q ; premise",
+      "| ¬Q ; assume",
+      "| | P ; assume",
+      "| | Q ; ImpE 1,3",
+      "| | ⊥ ; NotE 4,2",
+      "| ¬P ; NotI 3-5",
+      "¬Q → ¬P ; ImpI 2-6"
+    ]
+  },
+  {
+    "id": "disjunctive-syllogism",
+    "title": "Disjunctive syllogism",
+    "level": 3,
+    "premises": ["P ∨ Q", "¬P"],
+    "conclusion": "Q",
+    "hint": "Use OrE. In the P case, P clashes with ¬P, so BotE gives anything. In the Q case you already have Q.",
+    "solution": [
+      "P ∨ Q ; premise",
+      "¬P ; premise",
+      "| P ; assume",
+      "| ⊥ ; NotE 3,2",
+      "| Q ; BotE 4",
+      "| Q ; assume",
+      "| Q ; R 6",
+      "Q ; OrE 1,3-5,6-7"
+    ]
+  },
+  {
+    "id": "de-morgan-for-or",
+    "title": "De Morgan: not (P or Q)",
+    "level": 3,
+    "premises": ["¬(P ∨ Q)"],
+    "conclusion": "¬P ∧ ¬Q",
+    "hint": "Prove ¬P and ¬Q separately. Each needs a subproof that assumes the formula and reaches ⊥ using the premise. Join them with AndI.",
+    "solution": [
+      "¬(P ∨ Q) ; premise",
+      "| P ; assume",
+      "| P ∨ Q ; OrI 2",
+      "| ⊥ ; NotE 3,1",
+      "¬P ; NotI 2-4",
+      "| Q ; assume",
+      "| P ∨ Q ; OrI 6",
+      "| ⊥ ; NotE 7,1",
+      "¬Q ; NotI 6-8",
+      "¬P ∧ ¬Q ; AndI 5,9"
+    ]
+  },
+  {
+    "id": "conjunction-biconditional",
+    "title": "P and Q is equivalent to Q and P",
+    "level": 3,
+    "premises": [],
+    "conclusion": "(P ∧ Q) ↔ (Q ∧ P)",
+    "hint": "IffI needs two subproofs: one assuming P ∧ Q and ending in Q ∧ P, and one going the other way.",
+    "solution": [
+      "| P ∧ Q ; assume",
+      "| P ; AndE 1",
+      "| Q ; AndE 1",
+      "| Q ∧ P ; AndI 3,2",
+      "| Q ∧ P ; assume",
+      "| Q ; AndE 5",
+      "| P ; AndE 5",
+      "| P ∧ Q ; AndI 7,6",
+      "(P ∧ Q) ↔ (Q ∧ P) ; IffI 1-4,5-8"
+    ]
+  },
+  {
+    "id": "excluded-middle",
+    "title": "The law of excluded middle",
+    "level": 3,
+    "premises": [],
+    "conclusion": "P ∨ ¬P",
+    "hint": "Assume ¬(P ∨ ¬P) and show that leads to ⊥. Then NotI gives ¬¬(P ∨ ¬P) and DNE finishes the proof.",
+    "solution": [
+      "| ¬(P ∨ ¬P) ; assume",
+      "| | P ; assume",
+      "| | P ∨ ¬P ; OrI 2",
+      "| | ⊥ ; NotE 3,1",
+      "| ¬P ; NotI 2-4",
+      "| P ∨ ¬P ; OrI 5",
+      "| ⊥ ; NotE 6,1",
+      "¬¬(P ∨ ¬P) ; NotI 1-7",
+      "P ∨ ¬P ; DNE 8"
+    ]
+  }
+]

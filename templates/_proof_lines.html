@@ -1,0 +1,44 @@
+{% if result.complete %}
+<p class="verdict">
+    <span class="badge good">Proof complete</span>
+    Every line is justified and the last line is the conclusion.
+</p>
+{% elif result.valid and result.in_subproof %}
+<p class="verdict">
+    <span class="badge bad">Not finished</span>
+    Every line is correct, but the last line is inside a subproof. The conclusion
+    <code>{{ result.conclusion.display }}</code> must stand outside every subproof.
+</p>
+{% elif result.valid %}
+<p class="verdict">
+    <span class="badge bad">Not finished</span>
+    Every line is correct, but the last line is not the conclusion
+    <code>{{ result.conclusion.display }}</code>.
+</p>
+{% else %}
+<p class="verdict">
+    <span class="badge bad">{{ result.error_count }} error{{ '' if result.error_count == 1 else 's' }}</span>
+    Fix the marked lines.
+</p>
+{% endif %}
+
+<ol class="proof-lines">
+    {% for line in result.lines %}
+    <li class="proof-line {{ 'ok' if line.ok else 'bad' }}">
+        <p class="line-main">
+            <span class="bars" aria-hidden="true">{{ "│ " * line.depth }}</span>
+            <span class="mark" aria-hidden="true">{{ '✓' if line.ok else '✗' }}</span>
+            <span class="visually-hidden">{{ 'Correct' if line.ok else 'Error' }}{% if line.depth %}, inside {{ line.depth }} subproof{{ '' if line.depth == 1 else 's' }}{% endif %}:</span>
+            <code>{{ line.formula }}</code>
+            <span class="rule">{{ line.rule }}{% if line.refs %} {{ line.refs|join(", ") }}{% endif %}</span>
+        </p>
+        {% if not line.ok %}
+        {% if line.error.part is defined and line.error.position is defined %}
+        <pre class="error-context"><span class="line">{{ line.text }}</span>
+<span class="caret">{{ " " * line.error.position }}^</span></pre>
+        {% endif %}
+        <p class="line-error">{{ line.error.message }} <code>{{ line.error.code }}</code></p>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ol>

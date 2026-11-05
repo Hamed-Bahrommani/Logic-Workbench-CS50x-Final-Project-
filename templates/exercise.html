@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ exercise.title }} · Logic Workbench{% endblock %}
+
+{% block main %}
+<section aria-labelledby="exercise-heading">
+    <p class="meta"><a href="{{ url_for('exercise_list') }}">← All exercises</a></p>
+    <h2 id="exercise-heading">{{ exercise.title }}</h2>
+    <p class="meta">{{ levels[exercise.level] }}</p>
+
+    {% if exercise.premises %}
+    <p class="meta">Premises:</p>
+    <ol class="premise-list">
+        {% for premise in exercise.premises %}
+        <li><code>{{ premise }}</code></li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="meta">No premises.</p>
+    {% endif %}
+    <p class="canonical">Goal: <code>{{ exercise.conclusion }}</code></p>
+
+    <details class="rule-reference">
+        <summary>Hint</summary>
+        <p>{{ exercise.hint }}</p>
+    </details>
+
+    <form method="post" action="{{ url_for('submit_exercise', exercise_id=exercise.id) }}" class="stack-form">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <label for="proof">Your proof (one line each: <code>formula ; rule line-numbers</code>)</label>
+        <textarea id="proof" name="proof" class="formula-input" rows="10"
+                  autocomplete="off" spellcheck="false">{{ proof_text }}</textarea>
+        <div><button type="submit">Check my proof</button></div>
+    </form>
+    {% include "_symbols.html" %}
+    <p class="hint">
+        Open a subproof with <code>Assume</code> and start the line with <code>|</code>. The rules
+        are listed on the <a href="{{ url_for('proof_checker') }}">proof checker</a> page.
+    </p>
+</section>
+
+{% if result is not none %}
+{% if not result.ok %}
+{% include "_error.html" %}
+{% else %}
+<section aria-labelledby="result-heading">
+    <h2 id="result-heading">Result</h2>
+    {% include "_proof_lines.html" %}
+    {% if result.complete and next_exercise %}
+    <p><a href="{{ url_for('exercise_page', exercise_id=next_exercise.id) }}">Next exercise: {{ next_exercise.title }} →</a></p>
+    {% endif %}
+</section>
+{% endif %}
+{% endif %}
+
+{% if history %}
+<section aria-labelledby="history-heading">
+    <h2 id="history-heading">Your attempts</h2>
+    <ul class="attempts">
+        {% for attempt in history %}
+        <li>
+            <a href="{{ url_for('exercise_page', exercise_id=exercise.id, attempt=attempt.id) }}">{{ attempt.created_at }}</a>:
+            {% if attempt.status == 'complete' %}complete
+            {% elif attempt.status == 'unfinished' %}correct so far
+            {% else %}{{ attempt.error_count }} error{{ '' if attempt.error_count == 1 else 's' }}{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+<section aria-labelledby="solution-heading">
+    <details class="rule-reference">
+        <summary id="solution-heading">Stuck? Show a solution</summary>
+        <pre class="solution">{{ exercise.solution_text }}</pre>
+    </details>
+</section>
+{% endblock %}

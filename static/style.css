@@ -286,3 +286,21 @@ textarea.formula-input {
     color: var(--muted);
     white-space: pre;
 }
+
+/* --- exercises --- */
+
+h3 { font-size: 1rem; margin: 1.2rem 0 0.3rem; }
+.exercise-list { list-style: none; padding-left: 0; margin: 0.3rem 0; }
+.exercise-list li { margin: 0.3rem 0; }
+.exercise-list .mark { display: inline-block; width: 1.4rem; color: var(--muted); }
+.exercise-list .mark.ok { color: var(--yes-text); font-weight: 700; }
+.attempts { padding-left: 1.2rem; }
+.solution {
+    margin: 0.6rem 0 0;
+    padding: 0.6rem 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow-x: auto;
+}
+.forget-form { margin-top: 0.5rem; }
